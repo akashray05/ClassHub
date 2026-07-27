@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-
+from backend.app.routers import auth
 from .database.base import Base
 from .database.session import engine
 # import backend.app.models
@@ -25,6 +25,7 @@ register_exception_handlers(app)
 app.include_router(users.router)
 app.include_router(folders.router)
 app.include_router(files.router)
+app.include_router(auth.router)
 
 
 @app.get("/")

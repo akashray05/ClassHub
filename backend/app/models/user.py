@@ -1,11 +1,19 @@
-from sqlalchemy import Boolean, Column, Integer, String, DateTime
 from sqlalchemy.sql import func
-
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Boolean,
+    DateTime,
+    BigInteger,
+)
 from ..database.base import Base
 from sqlalchemy.orm import relationship
 
 class User(Base):
     __tablename__ = "users"
+
+
 
     id = Column(Integer, primary_key=True, index=True)
 
@@ -18,6 +26,18 @@ class User(Base):
     is_admin = Column(Boolean, default=False)
 
     is_active = Column(Boolean, default=True)
+
+    storage_quota = Column(
+        BigInteger,
+        nullable=False,
+        default=5 * 1024 * 1024 * 1024,  # 5 GB
+    )
+
+    storage_used = Column(
+        BigInteger,
+        nullable=False,
+        default=0,
+    )
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

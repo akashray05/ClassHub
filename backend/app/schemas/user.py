@@ -19,7 +19,13 @@ class LoginRequest(BaseModel):
     email: EmailStr
     password: str
 
-
 class Token(BaseModel):
     access_token: str
+    refresh_token: str
     token_type: str
+
+class StorageInfo(BaseModel):
+    used: int
+    quota: int
+    available: int
+    usage_percent: float

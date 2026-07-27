@@ -48,6 +48,16 @@ async def upload_file_service(
             status_code=404,
             detail="Folder not found",
         )
+
+    file.file.seek(0, 2)
+    file_size = file.file.tell()
+    file.file.seek(0)
+
+    if current_user.storage_used + file_size > current_user.storage_quota:
+        raise HTTPException(
+            status_code=413,
+            detail="Storage quota exceeded",
+        )
     
 
     stored_name, file_path, file_size = save_file(
@@ -71,6 +81,7 @@ async def upload_file_service(
 
     # return db_file
     db.add(db_file)
+    current_user.storage_used += file_size
     db.commit()
     db.refresh(db_file)
 
@@ -321,6 +332,12 @@ def permanently_delete_file_service(
         )
 
     # Delete the physical file
+
+    current_user.storage_used -= db_file.file_size
+
+# Safety check
+    if current_user.storage_used < 0:
+        current_user.storage_used = 0
     delete_file(db_file.file_path)
 
     # Delete the database record
