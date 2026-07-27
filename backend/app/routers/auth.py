@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta, timezone
-
+from ..services.auth_service import refresh_token_service
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -7,7 +7,10 @@ from sqlalchemy.orm import Session
 from ..database.session import get_db
 from ..models.user import User
 from ..models.refresh_token import RefreshToken
-from ..schemas.user import Token
+from ..schemas.user import (
+    Token,
+    RefreshTokenRequest,
+)
 from ..core.auth import (
     verify_password,
     create_access_token,
@@ -91,3 +94,20 @@ def login(
         "token_type": "bearer",
     }
 
+
+# @router.post("/refresh", response_model=Token)
+# def refresh_token(
+#     request: RefreshTokenRequest,
+#     db: Session = Depends(get_db),
+# ):
+#     pass
+
+@router.post("/refresh", response_model=Token)
+def refresh_token(
+    request: RefreshTokenRequest,
+    db: Session = Depends(get_db),
+):
+    return refresh_token_service(
+        db=db,
+        refresh_token=request.refresh_token,
+    )

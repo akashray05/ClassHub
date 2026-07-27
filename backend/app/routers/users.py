@@ -26,7 +26,7 @@ from ..schemas.user import (
     Token
 )
 from backend.app.schemas.user import StorageInfo
-from backend.app.services.auth_service import get_storage_info
+from backend.app.services.user_service import get_storage_info
 
 router = APIRouter(
     prefix="/users",

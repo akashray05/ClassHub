@@ -29,3 +29,6 @@ class StorageInfo(BaseModel):
     quota: int
     available: int
     usage_percent: float
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
