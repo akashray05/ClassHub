@@ -75,3 +75,45 @@ def refresh_token_service(db: Session, refresh_token: str):
         "refresh_token": new_refresh_token,
         "token_type": "bearer",
     }
+
+def logout_all_service(db: Session, user: User):
+
+    db.query(RefreshToken).filter(
+        RefreshToken.user_id == user.id,
+        RefreshToken.revoked == False,
+    ).update(
+        {"revoked": True},
+        synchronize_session=False,
+    )
+
+    db.commit()
+
+    return {
+        "message": "Logged out from all devices successfully"
+    }
+
+
+def logout_service(db: Session, refresh_token: str):
+    hashed_token = hash_refresh_token(refresh_token)
+
+    db_token = (
+        db.query(RefreshToken)
+        .filter(
+            RefreshToken.token_hash == hashed_token,
+            RefreshToken.revoked == False,
+        )
+        .first()
+    )
+
+    if not db_token:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid refresh token",
+        )
+
+    db_token.revoked = True
+    db.commit()
+
+    return {
+        "message": "Logged out successfully"
+    }

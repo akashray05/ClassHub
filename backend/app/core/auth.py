@@ -60,7 +60,7 @@ def create_access_token(data: dict):
 
 
 oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl="auth/login"
+    tokenUrl="/auth/login"
 )
 
 

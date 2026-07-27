@@ -2,7 +2,6 @@ from datetime import datetime, timedelta, timezone
 from ..services.auth_service import refresh_token_service
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
 
 from ..database.session import get_db
 from ..models.user import User
@@ -10,6 +9,16 @@ from ..models.refresh_token import RefreshToken
 from ..schemas.user import (
     Token,
     RefreshTokenRequest,
+)
+
+from sqlalchemy.orm import Session
+from fastapi import Depends
+
+from ..dependencies import get_current_user
+from ..services.auth_service import (
+    refresh_token_service,
+    logout_service,
+    logout_all_service,
 )
 from ..core.auth import (
     verify_password,
@@ -19,6 +28,12 @@ from ..core.auth import (
 )
 from ..core.config import settings
 
+
+from ..services.auth_service import (
+    refresh_token_service,
+    logout_service,
+    logout_all_service,
+)
 router = APIRouter(
     prefix="/auth",
     tags=["Authentication"],
@@ -110,4 +125,25 @@ def refresh_token(
     return refresh_token_service(
         db=db,
         refresh_token=request.refresh_token,
+    )
+
+@router.post("/logout")
+def logout(
+    request: RefreshTokenRequest,
+    db: Session = Depends(get_db),
+):
+    return logout_service(
+        db=db,
+        refresh_token=request.refresh_token,
+    )
+
+
+@router.post("/logout-all")
+def logout_all(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return logout_all_service(
+        db=db,
+        user=current_user,
     )

@@ -7,8 +7,12 @@ from .models import user, folder, file
 from .routers import files
 from .routers import folders
 from .routers import users
+from backend.app.routers import admin
 
 from .exceptions.handlers import register_exception_handlers
+
+
+app.include_router(admin.router)
 
 Base.metadata.create_all(bind=engine)
 
