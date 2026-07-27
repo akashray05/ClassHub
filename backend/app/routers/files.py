@@ -1,18 +1,26 @@
-from ..services.file_service import (
-    upload_file_service,
-    download_file_service,
-    get_folder_files_service,
-    rename_file_service,
-    delete_file_service,
-)
+
+
+# from ..services.file_service import (
+#     upload_file_service,
+#     download_file_service,
+#     get_folder_files_service,
+#     rename_file_service,
+#     delete_file_service,
+#     search_files_service,
+#     restore_file_service,
+#     permanently_delete_file_service
+# )
 
 from ..services.file_service import (
     upload_file_service,
     download_file_service,
-    get_folder_files_service,
     rename_file_service,
     delete_file_service,
     search_files_service,
+    get_folder_files_service,
+    get_trash_files_service,
+    restore_file_service,
+    permanently_delete_file_service,
 )
 from ..schemas.file import (
     FileResponse,
@@ -150,4 +158,28 @@ def rename_file(
         current_user=current_user,
         file_id=file_id,
         original_name=file_data.original_name,
+    )
+
+@router.put("/restore/{file_id}")
+def restore_file(
+    file_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    return restore_file_service(
+        db=db,
+        current_user=current_user,
+        file_id=file_id,
+    )
+
+@router.delete("/permanent/{file_id}")
+def permanently_delete_file(
+    file_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    return permanently_delete_file_service(
+        db=db,
+        current_user=current_user,
+        file_id=file_id,
     )

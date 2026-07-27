@@ -3,6 +3,8 @@ from ..core.logger import logger
 from pathlib import Path
 import shutil
 import uuid
+from datetime import datetime
+
 from math import ceil
 from .storage_service import save_file
 from fastapi import HTTPException, UploadFile
@@ -47,22 +49,6 @@ async def upload_file_service(
             detail="Folder not found",
         )
     
-    # user_folder = (
-    #     UPLOAD_DIR
-    #     / f"user_{current_user.id}"
-    #     / f"folder_{folder_id}"
-    # )
-
-    # user_folder.mkdir(parents=True, exist_ok=True)
-
-    # extension = Path(file.filename).suffix
-
-    # stored_name = f"{uuid.uuid4()}{extension}"
-
-    # file_path = user_folder / stored_name
-
-    # with open(file_path, "wb") as buffer:
-    #     shutil.copyfileobj(file.file, buffer)
 
     stored_name, file_path, file_size = save_file(
         current_user=current_user,
@@ -106,6 +92,7 @@ def download_file_service(
         .filter(
             FileModel.id == file_id,
             FileModel.owner_id == current_user.id,
+            FileModel.is_deleted == False,  # noqa: E712
         )
         .first()
     )
@@ -118,16 +105,7 @@ def download_file_service(
 
     # path = Path(db_file.file_path)
 
-    # if not path.exists():
-    #     raise HTTPException(
-    #         status_code=404,
-    #         detail="File missing from storage",
-    #     )
 
-    # return FastAPIFileResponse(
-    #     path=str(path),
-    #     filename=db_file.original_name,
-    #     media_type=db_file.mime_type,
     # )
     if not file_exists(db_file.file_path):
         raise HTTPException(
@@ -141,32 +119,6 @@ def download_file_service(
         mime_type=db_file.mime_type,
     )
 
-# def get_folder_files_service(
-#     db: Session,
-#     current_user,
-#     folder_id: int,
-# ):
-#     folder = (
-#         db.query(Folder)
-#         .filter(
-#             Folder.id == folder_id,
-#             Folder.owner_id == current_user.id,
-#         )
-#         .first()
-#     )
-
-#     if folder is None:
-#         raise HTTPException(
-#             status_code=404,
-#             detail="Folder not found",
-#         )
-
-#     return (
-#         db.query(FileModel)
-#         .filter(FileModel.folder_id == folder_id)
-#         .order_by(FileModel.created_at.desc())
-#         .all()
-#     )
 
 def rename_file_service(
     db: Session,
@@ -215,19 +167,17 @@ def delete_file_service(
             status_code=404,
             detail="File not found",
         )
-    delete_file(db_file.file_path)
-    # file_path = Path(db_file.file_path)
 
-    # if file_path.exists():
-    #     file_path.unlink()
 
-    db.delete(db_file)
+    db_file.is_deleted = True
+    db_file.deleted_at = datetime.utcnow()
+
     db.commit()
+    db.refresh(db_file)
 
     return {
-        "message": "File deleted successfully"
+        "message": "File moved to trash successfully"
     }
-
 
 def search_files_service(
     db: Session,
@@ -236,13 +186,22 @@ def search_files_service(
     page: int,
     limit: int,
 ):
+
     search_query = (
         db.query(FileModel)
         .filter(
             FileModel.owner_id == current_user.id,
+            FileModel.is_deleted == False,
             FileModel.original_name.ilike(f"%{query}%"),
         )
     )
+    # search_query = (
+    #     db.query(FileModel)
+    #     .filter(
+    #         FileModel.owner_id == current_user.id,
+    #         FileModel.original_name.ilike(f"%{query}%"),
+    #     )
+    # )
 
     total = search_query.count()
 
@@ -288,7 +247,11 @@ def get_folder_files_service(
 
     query = (
         db.query(FileModel)
-        .filter(FileModel.folder_id == folder_id)
+        .filter(
+            FileModel.folder_id == folder_id,
+            FileModel.owner_id == current_user.id,
+            FileModel.is_deleted == False,
+        )
     )
     result = paginate(
         query.order_by(FileModel.created_at.desc()),
@@ -304,21 +267,94 @@ def get_folder_files_service(
         "files": result["items"],
     }
 
-    # total = query.count()
 
-    # offset = (page - 1) * limit
+def restore_file_service(
+    db: Session,
+    current_user,
+    file_id: int,
+):
+    db_file = (
+        db.query(FileModel)
+        .filter(
+            FileModel.id == file_id,
+            FileModel.owner_id == current_user.id,
+            FileModel.is_deleted == True,
+        )
+        .first()
+    )
 
-    # files = (
-    #     query.order_by(FileModel.created_at.desc())
-    #     .offset(offset)
-    #     .limit(limit)
-    #     .all()
-    # )
+    if db_file is None:
+        raise HTTPException(
+            status_code=404,
+            detail="File not found in trash",
+        )
 
-    # return {
-    #     "page": page,
-    #     "limit": limit,
-    #     "total": total,
-    #     "pages": ceil(total / limit) if total else 1,
-    #     "files": files,
-    # }
+    db_file.is_deleted = False
+    db_file.deleted_at = None
+
+    db.commit()
+    db.refresh(db_file)
+
+    return {
+        "message": "File restored successfully"
+    }
+
+def permanently_delete_file_service(
+    db: Session,
+    current_user,
+    file_id: int,
+):
+    db_file = (
+        db.query(FileModel)
+        .filter(
+            FileModel.id == file_id,
+            FileModel.owner_id == current_user.id,
+            FileModel.is_deleted == True,
+        )
+        .first()
+    )
+
+    if db_file is None:
+        raise HTTPException(
+            status_code=404,
+            detail="File not found in trash",
+        )
+
+    # Delete the physical file
+    delete_file(db_file.file_path)
+
+    # Delete the database record
+    db.delete(db_file)
+    db.commit()
+
+    return {
+        "message": "File permanently deleted successfully"
+    }
+
+def get_trash_files_service(
+    db: Session,
+    current_user,
+    page: int,
+    limit: int,
+):
+    query = (
+        db.query(FileModel)
+        .filter(
+            FileModel.owner_id == current_user.id,
+            FileModel.is_deleted == True,
+        )
+    )
+
+    result = paginate(
+        query.order_by(FileModel.deleted_at.desc()),
+        page,
+        limit,
+    )
+
+    return {
+        "page": result["page"],
+        "limit": result["limit"],
+        "total": result["total"],
+        "pages": result["pages"],
+        "files": result["items"],
+    }
