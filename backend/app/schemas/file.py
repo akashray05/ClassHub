@@ -24,3 +24,19 @@ class PaginatedFileResponse(BaseModel):
     total: int
     pages: int
     files: list[FileResponse]
+
+class ShareFileRequest(BaseModel):
+    shared_with_id: int
+    can_download: bool = True
+
+class SharedFileResponse(BaseModel):
+    file_id: int
+    original_name: str
+    file_size: int
+    owner_name: str
+    owner_email: str
+    shared_at: datetime
+    can_download: bool
+
+    class Config:
+        from_attributes = True

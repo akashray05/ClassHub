@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends
-
-from ..dependencies.permissions import get_current_admin
+from ..dependencies import get_current_admin
 from ..models.user import User
 
 router = APIRouter(

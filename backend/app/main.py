@@ -12,7 +12,6 @@ from backend.app.routers import admin
 from .exceptions.handlers import register_exception_handlers
 
 
-app.include_router(admin.router)
 
 Base.metadata.create_all(bind=engine)
 
@@ -26,10 +25,13 @@ app = FastAPI(
 register_exception_handlers(app)
 
 # Routers
+
 app.include_router(users.router)
 app.include_router(folders.router)
 app.include_router(files.router)
 app.include_router(auth.router)
+app.include_router(admin.router)
+
 
 
 @app.get("/")

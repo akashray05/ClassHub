@@ -11,6 +11,10 @@
 #     permanently_delete_file_service
 # )
 
+from ..schemas.file import SharedFileResponse
+from ..services.file_service import get_shared_with_me_service
+from ..schemas.file import ShareFileRequest
+from ..services.file_service import share_file_service
 from ..services.file_service import (
     upload_file_service,
     download_file_service,
@@ -182,4 +186,30 @@ def permanently_delete_file(
         db=db,
         current_user=current_user,
         file_id=file_id,
+    )
+
+@router.post("/{file_id}/share")
+def share_file(
+    file_id: int,
+    request: ShareFileRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return share_file_service(
+        db=db,
+        file_id=file_id,
+        owner=current_user,
+        shared_with_id=request.shared_with_id,
+        can_download=request.can_download,
+    )
+
+@router.get("/shared-with-me")
+
+def shared_with_me(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return get_shared_with_me_service(
+        db,
+        current_user,
     )

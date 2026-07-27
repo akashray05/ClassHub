@@ -5,6 +5,9 @@ import shutil
 import uuid
 from datetime import datetime
 
+from ..models.shared_file import SharedFile
+from ..models.user import User
+
 from math import ceil
 from .storage_service import save_file
 from fastapi import HTTPException, UploadFile
@@ -375,3 +378,140 @@ def get_trash_files_service(
         "pages": result["pages"],
         "files": result["items"],
     }
+
+def share_file_service(
+    db: Session,
+    file_id: int,
+    owner: User,
+    shared_with_id: int,
+    can_download: bool,
+):
+    # Find the file
+    file = (
+        db.query(File)
+        .filter(
+            File.id == file_id,
+            File.owner_id == owner.id,
+            File.is_deleted == False,
+        )
+        .first()
+    )
+
+    if not file:
+        raise HTTPException(
+            status_code=404,
+            detail="File not found",
+        )
+
+    # Check recipient exists
+    recipient = (
+        db.query(User)
+        .filter(User.id == shared_with_id)
+        .first()
+    )
+
+    if not recipient:
+        raise HTTPException(
+            status_code=404,
+            detail="User not found",
+        )
+
+    # Prevent sharing with yourself
+    if recipient.id == owner.id:
+        raise HTTPException(
+            status_code=400,
+            detail="You already own this file",
+        )
+
+    # Prevent duplicate share
+    existing = (
+        db.query(SharedFile)
+        .filter(
+            SharedFile.file_id == file.id,
+            SharedFile.shared_with_id == shared_with_id,
+        )
+        .first()
+    )
+
+    if existing:
+        raise HTTPException(
+            status_code=409,
+            detail="File already shared with this user",
+        )
+
+    share = SharedFile(
+        file_id=file.id,
+        owner_id=owner.id,
+        shared_with_id=shared_with_id,
+        can_download=can_download,
+    )
+
+    db.add(share)
+    db.commit()
+    db.refresh(share)
+
+    return {
+        "message": "File shared successfully"
+    }
+
+# def get_shared_with_me_service(
+#     db: Session,
+#     current_user: User,
+# ):
+#     results = (
+#         db.query(SharedFile, File, User)
+#         .join(File, SharedFile.file_id == File.id)
+#         .join(User, SharedFile.owner_id == User.id)
+#         .filter(
+#             SharedFile.shared_with_id == current_user.id,
+#             File.is_deleted == False,
+#         )
+#         .all()
+#     )
+
+#     response = []
+
+#     for share, file, owner in results:
+#         response.append({
+#             "file_id": file.id,
+#             "original_name": file.original_name,
+#             "file_size": file.file_size,
+#             "owner_name": owner.name,
+#             "owner_email": owner.email,
+#             "shared_at": share.created_at,
+#             "can_download": share.can_download,
+#         })
+
+#     return response
+
+def get_shared_with_me_service(
+    db: Session,
+    current_user: User,
+):
+    results = (
+        db.query(SharedFile, File, User)
+        .join(File, SharedFile.file_id == File.id)
+        .join(User, SharedFile.owner_id == User.id)
+        .filter(
+            SharedFile.shared_with_id == current_user.id,
+            File.is_deleted == False,
+        )
+        .all()
+    )
+
+    shared_files = []
+
+    for share, file, owner in results:
+        shared_files.append(
+            {
+                "file_id": file.id,
+                "original_name": file.original_name,
+                "file_size": file.file_size,
+                "owner_name": owner.name,
+                "owner_email": owner.email,
+                "shared_at": share.created_at,
+                "can_download": share.can_download,
+            }
+        )
+
+    return shared_files
