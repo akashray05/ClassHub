@@ -40,3 +40,21 @@ class SharedFileResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class SharedUser(BaseModel):
+    id: int
+    name: str
+    email: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class SharedByMeResponse(BaseModel):
+    file_id: int
+    original_name: str
+    shared_with: list[SharedUser]
+
+class UpdateSharePermissionRequest(BaseModel):
+    can_download: bool
+
+    model_config = ConfigDict(from_attributes=True)

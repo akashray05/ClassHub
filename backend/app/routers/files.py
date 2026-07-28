@@ -1,18 +1,17 @@
 
-
-# from ..services.file_service import (
-#     upload_file_service,
-#     download_file_service,
-#     get_folder_files_service,
-#     rename_file_service,
-#     delete_file_service,
-#     search_files_service,
-#     restore_file_service,
-#     permanently_delete_file_service
+from ..schemas.file import (SharedFileResponse, SharedByMeResponse, UpdateSharePermissionRequest)
+# from ..services.file_service import (get_shared_with_me_service, 
+#     get_shared_by_me_service,
+#     download_shared_file_service,
 # )
 
-from ..schemas.file import SharedFileResponse
-from ..services.file_service import get_shared_with_me_service
+from ..services.file_service import (
+    get_shared_with_me_service,
+    get_shared_by_me_service,
+    download_shared_file_service,
+    remove_share_service,
+    update_share_permission_service,
+)
 from ..schemas.file import ShareFileRequest
 from ..services.file_service import share_file_service
 from ..services.file_service import (
@@ -212,4 +211,58 @@ def shared_with_me(
     return get_shared_with_me_service(
         db,
         current_user,
+    )
+
+@router.get(
+    "/shared-by-me",
+    response_model=list[SharedByMeResponse],
+)
+def shared_by_me(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return get_shared_by_me_service(
+        db=db,
+        current_user=current_user,
+    )
+
+@router.get("/shared-download/{file_id}")
+def download_shared_file(
+    file_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return download_shared_file_service(
+        db=db,
+        current_user=current_user,
+        file_id=file_id,
+    )
+
+@router.delete("/share/{file_id}/{user_id}")
+def remove_share(
+    file_id: int,
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return remove_share_service(
+        db=db,
+        current_user=current_user,
+        file_id=file_id,
+        user_id=user_id,
+    )
+@router.patch("/share/{file_id}/{user_id}")
+def update_share_permission(
+    file_id: int,
+    user_id: int,
+    request: UpdateSharePermissionRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return update_share_permission_service(
+        db=db,
+        current_user=current_user,
+        file_id=file_id,
+        user_id=user_id,
+        can_download=request.can_download,
     )

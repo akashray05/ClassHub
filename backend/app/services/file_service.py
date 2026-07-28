@@ -5,6 +5,9 @@ import shutil
 import uuid
 from datetime import datetime
 
+from ..utils.file_utils import get_file_by_id, get_owned_file
+from ..utils.permissions import verify_download_permission
+
 from ..models.shared_file import SharedFile
 from ..models.user import User
 
@@ -515,3 +518,240 @@ def get_shared_with_me_service(
         )
 
     return shared_files
+
+def get_shared_by_me_service(
+    db: Session,
+    current_user: User,
+):
+    files = (
+        db.query(File)
+        .filter(
+            File.owner_id == current_user.id,
+            File.is_deleted == False,
+        )
+        .all()
+    )
+
+    result = []
+
+    for file in files:
+
+        shares = (
+            db.query(SharedFile, User)
+            .join(User, SharedFile.shared_with_id == User.id)
+            .filter(SharedFile.file_id == file.id)
+            .all()
+        )
+
+        shared_users = []
+
+        for share, user in shares:
+            shared_users.append(
+                {
+                    "id": user.id,
+                    "name": user.name,
+                    "email": user.email,
+                }
+            )
+
+        result.append(
+            {
+                "file_id": file.id,
+                "original_name": file.original_name,
+                "shared_with": shared_users,
+            }
+        )
+
+    return result
+
+def download_shared_file_service(
+    db: Session,
+    current_user: User,
+    file_id: int,
+):
+    try:
+        file = get_owned_file(
+            db=db,
+            file_id=file_id,
+            owner_id=current_user.id,
+        )
+
+        return get_file_response(
+            file_path=file.file_path,
+            filename=file.original_name,
+            mime_type=file.mime_type,
+        )
+
+    except HTTPException:
+        pass
+
+    verify_download_permission(
+        db=db,
+        file_id=file_id,
+        user_id=current_user.id,
+    )
+
+    file = get_file_by_id(
+        db=db,
+        file_id=file_id,
+    )
+
+    return get_file_response(
+        file_path=file.file_path,
+        filename=file.original_name,
+        mime_type=file.mime_type,
+    )
+
+
+# def download_shared_file_service(
+#     db: Session,
+#     current_user: User,
+#     file_id: int,
+# ):
+#     # Owner can always download
+#     file = (
+#         db.query(File)
+#         .filter(
+#             File.id == file_id,
+#             File.owner_id == current_user.id,
+#             File.is_deleted == False,
+#         )
+#         .first()
+#     )
+
+#     if file:
+#         return get_file_response(
+#             file_path=file.file_path,
+#             filename=file.original_name,
+#             mime_type=file.mime_type,
+#         )
+
+#     # Check if shared with current user
+#     shared = (
+#         db.query(SharedFile)
+#         .filter(
+#             SharedFile.file_id == file_id,
+#             SharedFile.shared_with_id == current_user.id,
+#             SharedFile.can_download == True,
+#         )
+#         .first()
+#     )
+
+#     if not shared:
+#         raise HTTPException(
+#             status_code=403,
+#             detail="You do not have permission to download this file.",
+#         )
+
+#     file = (
+#         db.query(File)
+#         .filter(
+#             File.id == file_id,
+#             File.is_deleted == False,
+#         )
+#         .first()
+#     )
+
+#     if not file:
+#         raise HTTPException(
+#             status_code=404,
+#             detail="File not found.",
+#         )
+
+#     return get_file_response(
+#         file_path=file.file_path,
+#         filename=file.original_name,
+#         mime_type=file.mime_type,
+#     )
+
+def remove_share_service(
+    db: Session,
+    current_user: User,
+    file_id: int,
+    user_id: int,
+):
+    file = (
+        db.query(File)
+        .filter(
+            File.id == file_id,
+            File.owner_id == current_user.id,
+            File.is_deleted == False,
+        )
+        .first()
+    )
+
+    if not file:
+        raise HTTPException(
+            status_code=404,
+            detail="File not found or you are not the owner.",
+        )
+
+    share = (
+        db.query(SharedFile)
+        .filter(
+            SharedFile.file_id == file_id,
+            SharedFile.shared_with_id == user_id,
+        )
+        .first()
+    )
+
+    if not share:
+        raise HTTPException(
+            status_code=404,
+            detail="Share record not found.",
+        )
+
+    db.delete(share)
+    db.commit()
+
+    return {"message": "Access revoked successfully."}
+
+
+def update_share_permission_service(
+    db: Session,
+    current_user: User,
+    file_id: int,
+    user_id: int,
+    can_download: bool,
+):
+    # Verify ownership
+    file = (
+        db.query(File)
+        .filter(
+            File.id == file_id,
+            File.owner_id == current_user.id,
+            File.is_deleted == False,
+        )
+        .first()
+    )
+
+    if not file:
+        raise HTTPException(
+            status_code=404,
+            detail="File not found or you are not the owner.",
+        )
+
+    share = (
+        db.query(SharedFile)
+        .filter(
+            SharedFile.file_id == file_id,
+            SharedFile.shared_with_id == user_id,
+        )
+        .first()
+    )
+
+    if not share:
+        raise HTTPException(
+            status_code=404,
+            detail="Share record not found.",
+        )
+
+    share.can_download = can_download
+
+    db.commit()
+    db.refresh(share)
+
+    return {
+        "message": "Share permission updated successfully.",
+        "can_download": share.can_download,
+    }
