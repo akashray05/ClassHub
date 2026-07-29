@@ -1,72 +1,66 @@
+# Standard library
+from pathlib import Path
 
-from ..schemas.file import (SharedFileResponse, SharedByMeResponse, UpdateSharePermissionRequest)
-# from ..services.file_service import (get_shared_with_me_service, 
-#     get_shared_by_me_service,
-#     download_shared_file_service,
-# )
+# Third-party
+from fastapi import (
+    APIRouter,
+    Depends,
+    UploadFile,
+    File,
+    Query,
+)
+from sqlalchemy.orm import Session
 
-from ..services.file_service import (
+# Local imports
+from ..core.auth import get_current_user
+from ..database.session import get_db
+from ..models.user import User
+
+from ..schemas.file import (
+    FileResponse,
+    FileRename,
+    PaginatedFileResponse,
+    ShareFileRequest,
+    SharedFileResponse,
+    SharedByMeResponse,
+    UpdateSharePermissionRequest,
+    SharedUser,
+)
+
+from ..services.upload_service import (
+    upload_file_service,
+    rename_file_service,
+)
+from ..services.download_service import (
+    download_file_service,
+)
+from ..services.listing_service import (
+    search_files_service,
+    get_folder_files_service,
+    get_trash_files_service,
+)
+
+from ..services.trash_service import (
+    delete_file_service,
+    restore_file_service,
+    permanently_delete_file_service,
+    
+)
+
+from ..services.share_service import (
+    share_file_service,
     get_shared_with_me_service,
     get_shared_by_me_service,
     download_shared_file_service,
     remove_share_service,
     update_share_permission_service,
 )
-from ..schemas.file import ShareFileRequest
-from ..services.file_service import share_file_service
-from ..services.file_service import (
-    upload_file_service,
-    download_file_service,
-    rename_file_service,
-    delete_file_service,
-    search_files_service,
-    get_folder_files_service,
-    get_trash_files_service,
-    restore_file_service,
-    permanently_delete_file_service,
-)
-from ..schemas.file import (
-    FileResponse,
-    FileRename,
-    PaginatedFileResponse,
-)
-
-from fastapi import (
-    APIRouter,
-    Depends,
-    UploadFile,
-    File,
-    Form,
-    HTTPException,
-    Query,
-)
-from fastapi.responses import FileResponse as FastAPIFileResponse
-from pathlib import Path
-from uuid import uuid4
-
-from fastapi import (
-    APIRouter,
-    Depends,
-    UploadFile,
-    File,
-    Form,
-    HTTPException,
-)
-from sqlalchemy.orm import Session
-
-from ..database.session import get_db
-from ..core.auth import get_current_user
-from ..models.user import User
-from ..models.folder import Folder
-from ..models.file import File as FileModel
-from ..schemas.file import FileResponse, FileRename
 
 router = APIRouter(
     prefix="/files",
     tags=["Files"],
 )
 
-UPLOAD_DIR = Path("uploads")
 
 
 @router.post("/upload", response_model=FileResponse)

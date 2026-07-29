@@ -1,18 +1,8 @@
-# from fastapi import APIRouter
 
-# router = APIRouter(
-#     prefix="/folders",
-#     tags=["Folders"],
-# )
-
-# @router.get("/")
-# def list_folders():
-#     return {"message": "Folders API is working!"}
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 
 from ..schemas.folder import FolderUpdate
-# from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from ..database.session import get_db
@@ -26,13 +16,6 @@ router = APIRouter(
     tags=["Folders"],
 )
 
-
-# def get_db():
-#     db = SessionLocal()
-#     try:
-#         yield db
-#     finally:
-#         db.close()
 
 
 @router.post("/", response_model=FolderResponse)

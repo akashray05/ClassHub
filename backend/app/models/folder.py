@@ -1,21 +1,3 @@
-# from sqlalchemy import Column, Integer, String, ForeignKey
-# from sqlalchemy.orm import relationship
-
-# from ..database.base import Base
-
-
-# class Folder(Base):
-#     __tablename__ = "folders"
-
-#     id = Column(Integer, primary_key=True, index=True)
-
-#     name = Column(String, nullable=False)
-
-#     owner_id = Column(Integer, ForeignKey("users.id"))
-
-#     owner = relationship("User", back_populates="folders")
-
-#     files = relationship("File", back_populates="folder")
 
 from datetime import datetime
 
@@ -30,7 +12,7 @@ class Folder(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    name = Column(String, nullable=False)
+    name = Column(String(100), nullable=False)
 
     description = Column(String, nullable=True)
 

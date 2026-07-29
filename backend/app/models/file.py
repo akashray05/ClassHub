@@ -9,10 +9,10 @@ from sqlalchemy import (
     ForeignKey,
     DateTime,
     BigInteger,
+    Boolean,
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from sqlalchemy import Boolean, DateTime
 from ..database.base import Base
 
 
@@ -22,15 +22,15 @@ class File(Base):
     id = Column(Integer, primary_key=True, index=True)
 
     # Original filename uploaded by the user
-    original_name = Column(String, nullable=False)
+    original_name = Column(String(255), nullable=False)
 
     # Filename stored on disk
-    stored_name = Column(String, nullable=False, unique=True)
+    stored_name = Column(String(255), nullable=False, unique=True)
 
     # uploads/user_1/folder_2/file.pdf
     file_path = Column(String, nullable=False)
 
-    mime_type = Column(String, nullable=False)
+    mime_type = Column(String(100), nullable=False)
 
     file_size = Column(BigInteger, nullable=False)
 

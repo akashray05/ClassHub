@@ -51,4 +51,6 @@ class RefreshToken(Base):
 
     ip_address = Column(String, nullable=True)
 
-    user = relationship("User")
+    user = relationship(
+        "User",
+        back_populates="refresh_tokens",)

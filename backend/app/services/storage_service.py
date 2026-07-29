@@ -83,15 +83,3 @@ def get_file_response(
         filename=filename,
         media_type=mime_type,
     )
-
-
-def get_file_response(
-    file_path: str,
-    filename: str,
-    mime_type: str,
-):
-    return FileResponse(
-        path=file_path,
-        filename=filename,
-        media_type=mime_type,
-    )

@@ -46,5 +46,11 @@ class User(Base):
     files = relationship(
     "File",
     back_populates="owner",
-    cascade="all, delete-orphan",
-)
+    cascade="all, delete-orphan", 
+    )
+
+    refresh_tokens = relationship(
+        "RefreshToken",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )

@@ -2,6 +2,10 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 
 
+from pydantic import Field
+
+
+
 class FileResponse(BaseModel):
     id: int
     original_name: str
@@ -14,8 +18,16 @@ class FileResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
+
 class FileRename(BaseModel):
     original_name: str
+    original_name: str = Field(
+    min_length=1,
+    max_length=255,
+)
+
+
 
 
 class PaginatedFileResponse(BaseModel):

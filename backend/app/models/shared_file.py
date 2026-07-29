@@ -9,8 +9,7 @@ from sqlalchemy import (
     UniqueConstraint,
 )
 
-from backend.app.database.base import Base
-
+from ..database.base import Base
 
 class SharedFile(Base):
     __tablename__ = "shared_files"

@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta, timezone
-from ..services.auth_service import refresh_token_service
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -12,14 +11,9 @@ from ..schemas.user import (
 )
 
 from sqlalchemy.orm import Session
-from fastapi import Depends
 
 from ..dependencies import get_current_user
-from ..services.auth_service import (
-    refresh_token_service,
-    logout_service,
-    logout_all_service,
-)
+
 from ..core.auth import (
     verify_password,
     create_access_token,
@@ -31,8 +25,8 @@ from ..core.config import settings
 
 from ..services.auth_service import (
     refresh_token_service,
-    logout_service,
     logout_all_service,
+    logout_service,
 )
 router = APIRouter(
     prefix="/auth",
@@ -68,11 +62,6 @@ def login(
         {"sub": db_user.email}
     )
 
-
-    access_token = create_access_token(
-        {"sub": db_user.email}
-    )
-
     # Revoke previous refresh tokens
     db.query(RefreshToken).filter(
         RefreshToken.user_id == db_user.id,
@@ -82,17 +71,9 @@ def login(
         synchronize_session=False,
     )
 
-    # Generate a new refresh token
     refresh_token = create_refresh_token()
 
-    # Store hashed token
 
-
-
-    # Generate refresh token
-    # refresh_token = create_refresh_token()
-
-    # Store hashed refresh token
     db_refresh_token = RefreshToken(
         user_id=db_user.id,
         token_hash=hash_refresh_token(refresh_token),
@@ -109,13 +90,6 @@ def login(
         "token_type": "bearer",
     }
 
-
-# @router.post("/refresh", response_model=Token)
-# def refresh_token(
-#     request: RefreshTokenRequest,
-#     db: Session = Depends(get_db),
-# ):
-#     pass
 
 @router.post("/refresh", response_model=Token)
 def refresh_token(

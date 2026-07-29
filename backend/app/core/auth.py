@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta, timezone
 import hashlib
 import secrets
-from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
@@ -14,7 +13,6 @@ from ..database.session import get_db
 from ..models.user import User
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / ".env")
 
 
 # Password hashing
@@ -28,11 +26,11 @@ ALGORITHM = settings.ALGORITHM
 ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 
 
-def hash_password(password: str):
+def hash_password(password: str) -> str:
     return pwd_context.hash(password)
 
 
-def verify_password(plain_password: str, hashed_password: str):
+def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(
         plain_password,
         hashed_password,
@@ -53,10 +51,6 @@ def create_access_token(data: dict):
         SECRET_KEY,
         algorithm=ALGORITHM,
     )
-
-
-# oauth2_scheme = OAuth2PasswordBearer(
-#     tokenUrl="users/login"
 
 
 oauth2_scheme = OAuth2PasswordBearer(
