@@ -28,10 +28,31 @@ class User(Base):
     is_active = Column(Boolean, default=True)
 
     is_verified = Column(
-    Boolean,
-    nullable=False,
-    default=False,
+        Boolean,
+        nullable=False,
+        default=False,
     )
+    verification_token_hash = Column(
+        String(255),
+        nullable=True,
+    )
+
+    verification_token_expires_at = Column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
+    password_reset_token_hash = Column(
+        String(255),
+        nullable=True,
+    )
+
+    password_reset_token_expires_at = Column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+        
+    
 
     verification_token_hash = Column(
         String(255),

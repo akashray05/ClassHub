@@ -32,6 +32,21 @@ from ..utils.tokens import (
 )
 
 
+from app.schemas.user import ResendVerificationRequest
+from app.services.resend_verification_service import (
+    resend_verification_service,
+)
+
+from app.schemas.user import ForgotPasswordRequest
+from app.services.forgot_password_service import (
+    forgot_password_service,
+)
+
+from app.schemas.user import ResetPasswordRequest
+from app.services.reset_password_service import (
+    reset_password_service,
+)
+
 @router.post("/register", response_model=UserResponse)
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
 
@@ -90,3 +105,35 @@ def get_storage(
     current_user: User = Depends(get_current_user),
 ):
     return get_storage_info(current_user)
+
+@router.post("/resend-verification")
+def resend_verification(
+    request: ResendVerificationRequest,
+    db: Session = Depends(get_db),
+):
+    return resend_verification_service(
+        db,
+        request.email,
+    )
+
+
+@router.post("/forgot-password")
+def forgot_password(
+    request: ForgotPasswordRequest,
+    db: Session = Depends(get_db),
+):
+    return forgot_password_service(
+        db,
+        request.email,
+    )
+
+@router.post("/reset-password")
+def reset_password(
+    request: ResetPasswordRequest,
+    db: Session = Depends(get_db),
+):
+    return reset_password_service(
+        db,
+        request.token,
+        request.new_password,
+    )
