@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from backend.app.routers import auth
+from app.routers import auth
 from .database.base import Base
 from .database.session import engine
 # import backend.app.models
@@ -7,7 +7,7 @@ from .models import user, folder, file
 from .routers import files
 from .routers import folders
 from .routers import users
-from backend.app.routers import admin
+from app.routers import admin
 
 from .exceptions.handlers import register_exception_handlers
 

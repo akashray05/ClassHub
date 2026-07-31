@@ -4,7 +4,7 @@ import shutil
 from fastapi.responses import FileResponse
 
 from fastapi import UploadFile
-
+from .base import StorageProvider
 from ..core.constants import (
     UPLOAD_DIR,
     ALLOWED_EXTENSIONS,
@@ -12,7 +12,7 @@ from ..core.constants import (
 
 class LocalStorage(StorageProvider):
     def save_file(
-        # self,
+        self,
         current_user,
         folder_id: int,
         file: UploadFile,
@@ -50,37 +50,37 @@ class LocalStorage(StorageProvider):
 
 
 
-def delete_file(file_path: str):
-    """
-    Permanently delete a file from storage.
-    """
+    def delete_file(self,file_path: str):
+        """
+        Permanently delete a file from storage.
+        """
 
-    path = Path(file_path)
+        path = Path(file_path)
 
-    if path.exists():
-        path.unlink()
-    
-def file_exists(file_path: str) -> bool:
-    """
-    Check whether a file exists in storage.
-    """
+        if path.exists():
+            path.unlink()
+        
+    def file_exists(self,file_path: str) -> bool:
+        """
+        Check whether a file exists in storage.
+        """
 
-    return Path(file_path).exists()
-
-from fastapi.responses import FileResponse
+        return Path(file_path).exists()
 
 
-def get_file_response(
-    file_path: str,
-    filename: str,
-    mime_type: str,
-):
-    """
-    Return a downloadable response.
-    """
 
-    return FileResponse(
-        path=file_path,
-        filename=filename,
-        media_type=mime_type,
-    )
+    def get_file_response(
+        self,
+        file_path: str,
+        filename: str,
+        mime_type: str,
+    ):
+        """
+        Return a downloadable response.
+        """
+
+        return FileResponse(
+            path=file_path,
+            filename=filename,
+            media_type=mime_type,
+        )

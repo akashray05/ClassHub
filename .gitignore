@@ -1,7 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+venv/
+backend/venv/
+
+# Environment variables
 .env
 
-__pycache__/
+# IDE
+.vscode/
+.idea/
 
-*.pyc
+# Logs
+logs/
 
-backend/venv/
+# Uploaded files
+uploads/

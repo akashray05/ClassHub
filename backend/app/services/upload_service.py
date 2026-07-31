@@ -6,7 +6,10 @@ from ..models.file import File
 from ..models.folder import Folder
 from ..models.file import File as FileModel
 
-from .storage_service import save_file
+from ..storage import get_storage
+
+
+storage = get_storage()
 async def upload_file_service(
     db: Session,
     current_user,
@@ -43,11 +46,17 @@ async def upload_file_service(
         )
     
 
-    stored_name, file_path, file_size = save_file(
-        current_user=current_user,
-        folder_id=folder_id,
-        file=file,
+    # stored_name, file_path, file_size = save_file(
+    #     current_user=current_user,
+    #     folder_id=folder_id,
+    #     file=file,
+    # )
+    stored_name, file_path, file_size = storage.save_file(
+    current_user=current_user,
+    folder_id=folder_id,
+    file=file,
     )
+
     db_file = File(
         original_name=file.filename,
         stored_name=stored_name,

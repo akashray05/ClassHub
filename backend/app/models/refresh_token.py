@@ -9,7 +9,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from datetime import datetime
 
-from backend.app.database.base import Base
+from app.database.base import Base
 
 
 class RefreshToken(Base):

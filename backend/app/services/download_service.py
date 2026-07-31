@@ -3,12 +3,11 @@ from sqlalchemy.orm import Session
 
 from ..models.file import File as FileModel
 
-from .storage_service import (
-    file_exists,
-    get_file_response,
-)
 
 
+from ..storage import get_storage
+
+storage = get_storage()
 
 def download_file_service(
     db: Session,
@@ -35,13 +34,14 @@ def download_file_service(
 
 
     # )
-    if not file_exists(db_file.file_path):
+    # if not file_exists(db_file.file_path):
+    if not storage.file_exists(db_file.file_path):
         raise HTTPException(
             status_code=404,
             detail="File missing from storage",
         )
 
-    return get_file_response(
+    return storage.get_file_response(
         file_path=db_file.file_path,
         filename=db_file.original_name,
         mime_type=db_file.mime_type,

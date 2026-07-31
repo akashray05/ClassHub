@@ -14,8 +14,9 @@ from ..utils.permissions import (
     verify_download_permission,
 )
 
-from .storage_service import get_file_response
+from ..storage import get_storage
 
+storage = get_storage()
 def share_file_service(
     db: Session,
     file_id: int,
@@ -181,10 +182,15 @@ def download_shared_file_service(
             owner_id=current_user.id,
         )
 
-        return get_file_response(
-            file_path=file.file_path,
-            filename=file.original_name,
-            mime_type=file.mime_type,
+        # return get_file_response(
+        #     file_path=file.file_path,
+        #     filename=file.original_name,
+        #     mime_type=file.mime_type,
+        # )
+        return storage.get_file_response(
+        file_path=file.file_path,
+        filename=file.original_name,
+        mime_type=file.mime_type,
         )
 
     except HTTPException:
@@ -201,7 +207,7 @@ def download_shared_file_service(
         file_id=file_id,
     )
 
-    return get_file_response(
+    return storage.get_file_response(
         file_path=file.file_path,
         filename=file.original_name,
         mime_type=file.mime_type,

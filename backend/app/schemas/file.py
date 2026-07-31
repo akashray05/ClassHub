@@ -50,8 +50,7 @@ class SharedFileResponse(BaseModel):
     shared_at: datetime
     can_download: bool
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class SharedUser(BaseModel):
     id: int

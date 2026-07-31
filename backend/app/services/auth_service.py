@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
@@ -59,7 +59,7 @@ def refresh_token_service(db: Session, refresh_token: str):
     new_db_token = RefreshToken(
         user_id=user.id,
         token_hash=hash_refresh_token(new_refresh_token),
-        expires_at=datetime.utcnow()
+        expires_at=datetime.now(UTC)
         + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
         revoked=False,
         device_name=db_token.device_name,

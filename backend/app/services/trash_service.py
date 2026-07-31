@@ -1,11 +1,13 @@
 
-from datetime import datetime
+from datetime import datetime, timedelta, UTC
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from ..models.file import File as FileModel
-from .storage_service import delete_file
+from ..storage import get_storage
+
+storage = get_storage()
 
 def delete_file_service(
     db: Session,
@@ -29,7 +31,7 @@ def delete_file_service(
 
 
     db_file.is_deleted = True
-    db_file.deleted_at = datetime.utcnow()
+    db_file.deleted_at = datetime.now(UTC)
 
     db.commit()
     db.refresh(db_file)
@@ -99,7 +101,7 @@ def permanently_delete_file_service(
 # Safety check
     if current_user.storage_used < 0:
         current_user.storage_used = 0
-    delete_file(db_file.file_path)
+    storage.delete_file(db_file.file_path)
 
     # Delete the database record
     db.delete(db_file)
