@@ -22,3 +22,15 @@ def verification_token_expiry(hours: int = 24) -> datetime:
     Verification links expire after 24 hours by default.
     """
     return datetime.now(timezone.utc) + timedelta(hours=hours)
+
+def generate_hashed_token():
+    """
+    Generate a secure token and its SHA-256 hash.
+
+    Returns:
+        tuple[str, str]: (raw_token, token_hash)
+    """
+    raw_token = generate_secure_token()
+    token_hash = hash_token(raw_token)
+
+    return raw_token, token_hash

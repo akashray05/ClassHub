@@ -8,7 +8,7 @@ from ..core.auth import (
     hash_password,
     create_access_token
 )
-
+from app.services.notification_service import send_verification_email
 from ..database.session import get_db
 from datetime import timedelta, timezone
 
@@ -26,8 +26,7 @@ router = APIRouter(
 )
 from app.services.email_verification_service import verify_email_service
 from ..utils.tokens import (
-    generate_secure_token,
-    hash_token,
+    generate_hashed_token,
     verification_token_expiry,
 )
 
@@ -60,14 +59,13 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
             detail="Email already registered"
         )
 
-    verification_token = generate_secure_token()
-
+    verification_token, verification_token_hash = generate_hashed_token()
     new_user = User(
         name=user.name,
         email=user.email,
         password=hash_password(user.password),
         is_verified=False,
-        verification_token_hash=hash_token(verification_token),
+        verification_token_hash=verification_token_hash,        
         verification_token_expires_at=verification_token_expiry(),
     )
 
@@ -75,10 +73,15 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
 
-    # Temporary: print verification link until SMTP is added
-    print(
-        f"\nEmail verification link:\n"
-        f"http://localhost:8000/users/verify-email?token={verification_token}\n"
+    # # Temporary: print verification link until SMTP is added
+    # print(
+    #     f"\nEmail verification link:\n"
+    #     f"http://localhost:8000/users/verify-email?token={verification_token}\n"
+    # )
+
+    send_verification_email(
+        new_user.email,
+        verification_token,
     )
 
     return new_user

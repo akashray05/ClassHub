@@ -3,12 +3,11 @@ from sqlalchemy.orm import Session
 
 from app.models.user import User
 from app.utils.tokens import (
-    generate_secure_token,
-    hash_token,
+    generate_hashed_token,
     verification_token_expiry,
 )
 
-
+from app.services.notification_service import send_verification_email
 def resend_verification_service(
     db: Session,
     email: str,
@@ -30,16 +29,22 @@ def resend_verification_service(
             "message": "Email already verified"
         }
 
-    token = generate_secure_token()
+    token, token_hash = generate_hashed_token()
 
-    user.verification_token_hash = hash_token(token)
+
+    user.verification_token_hash = token_hash
     user.verification_token_expires_at = verification_token_expiry()
 
     db.commit()
 
-    print(
-        f"\nVerification link:\n"
-        f"http://localhost:8000/users/verify-email?token={token}\n"
+    # print(
+    #     f"\nVerification link:\n"
+    #     f"http://localhost:8000/users/verify-email?token={token}\n"
+    # )
+
+    send_verification_email(
+        user.email,
+        token,
     )
 
     return {
