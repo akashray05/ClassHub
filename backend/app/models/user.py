@@ -27,6 +27,22 @@ class User(Base):
 
     is_active = Column(Boolean, default=True)
 
+    is_verified = Column(
+    Boolean,
+    nullable=False,
+    default=False,
+    )
+
+    verification_token_hash = Column(
+        String(255),
+        nullable=True,
+    )
+
+    verification_token_expires_at = Column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
     storage_quota = Column(
         BigInteger,
         nullable=False,

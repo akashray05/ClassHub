@@ -24,8 +24,12 @@ router = APIRouter(
     prefix="/users",
     tags=["Users"]
 )
-
-
+from app.services.email_verification_service import verify_email_service
+from ..utils.tokens import (
+    generate_secure_token,
+    hash_token,
+    verification_token_expiry,
+)
 
 
 @router.post("/register", response_model=UserResponse)
@@ -41,17 +45,35 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
             detail="Email already registered"
         )
 
+    verification_token = generate_secure_token()
+
     new_user = User(
         name=user.name,
         email=user.email,
-        password=hash_password(user.password)
+        password=hash_password(user.password),
+        is_verified=False,
+        verification_token_hash=hash_token(verification_token),
+        verification_token_expires_at=verification_token_expiry(),
     )
 
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
 
+    # Temporary: print verification link until SMTP is added
+    print(
+        f"\nEmail verification link:\n"
+        f"http://localhost:8000/users/verify-email?token={verification_token}\n"
+    )
+
     return new_user
+
+@router.get("/verify-email")
+def verify_email(
+    token: str,
+    db: Session = Depends(get_db),
+):
+    return verify_email_service(db, token)
 
 
 @router.get("/me", response_model=UserResponse)
