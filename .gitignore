@@ -1,23 +1,28 @@
 # Python
-__pycache__/
-*.py[cod]
-.pytest_cache/
-.coverage
-htmlcov/
-
-# Virtual environments
-venv/
 backend/venv/
+__pycache__/
+*.pyc
+*.pyo
 
-# Environment variables
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Environment
 .env
+backend/.env
+frontend/.env
 
 # IDE
 .vscode/
 .idea/
 
-# Logs
-logs/
+# OS
+.DS_Store
+Thumbs.db
 
-# Uploaded files
+# Logs
+*.log
+
+# Uploads (optional)
 uploads/

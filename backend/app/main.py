@@ -8,7 +8,7 @@ from .routers import files
 from .routers import folders
 from .routers import users
 from app.routers import admin
-
+from fastapi.middleware.cors import CORSMiddleware
 from .exceptions.handlers import register_exception_handlers
 
 
@@ -19,6 +19,15 @@ app = FastAPI(
     title="ClassHub API",
     version="1.0.0",
     description="Backend API for ClassHub"
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Register global exception handlers

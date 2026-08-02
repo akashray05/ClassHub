@@ -8,3 +8,24 @@ export async function getFolderFiles(folderId: number) {
 
   return response.data;
 }
+
+export async function uploadFile(
+  folderId: number,
+  file: File 
+) {
+  const form = new FormData();
+
+  form.append("file", file);
+
+  const response = await api.post(
+    `/files/upload?folder_id=${folderId}`,
+    form,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  return response.data;
+}

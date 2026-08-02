@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { email } from "zod";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -33,6 +34,11 @@ export default function LoginPage() {
       localStorage.setItem(
         "access_token",
         result.access_token
+      );
+
+      localStorage.setItem(
+        "user_name",
+        data.email
       );
 
       localStorage.setItem(
