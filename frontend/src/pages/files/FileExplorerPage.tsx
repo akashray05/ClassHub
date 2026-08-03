@@ -1,17 +1,33 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import FileUpload from "../../components/files/FileUpload";
+import { useUpload } from "@/hooks/useUpload";
+import { UploadDropzone } from "@/components/files";
+
+// import { UploadDropzone } from "../../components/files/UploadDropzone";
 import { getFolderFiles } from "../../services/file";
 import type { FileItem } from "../../types/file";
-import FileCard from "@/components/files/Filecard";
+import {
+  EmptyFiles,
+  FileGrid,
+  FileToolbar,
+} from "@/components/files";
+
 
 export default function FileExplorerPage() {
   const { folderId } = useParams();
 
   const [files, setFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
+  const { uploading, upload } = useUpload({
+  folderId: Number(folderId),
+  onSuccess: loadFiles,
+  });
+
+  const [gridView, setGridView] =
+    useState(true);
   async function loadFiles() {
     if (!folderId) return;
 
@@ -40,25 +56,40 @@ export default function FileExplorerPage() {
         Folder #{folderId}
       </h1>
 
-      <FileUpload
-        folderId={Number(folderId)}
-        onUploadSuccess={loadFiles}
+      <UploadDropzone
+        onFilesSelected={upload}
       />
+      <FileToolbar
+        search={search}
+        onSearchChange={setSearch}
+        gridView={gridView}
+        onToggleView={() =>
+        setGridView((v) => !v)
+        }
+        onUpload={() => {
+          console.log("upload");
+       }}
+      />
+
+
+
 
       <div className="mt-8">
 
         {files.length === 0 ? (
-          <p className="text-slate-400">
-            No files in this folder.
-          </p>
-        ) : (
-          files.map((file) => (
-            <FileCard
-              key={file.id}
-              file={file}
-            />
-          ))
-        )}
+           <EmptyFiles
+               onUpload={() => {
+                  console.log("Upload clicked");
+              }}
+           />
+      ) : (
+         <FileGrid
+           files={files}
+           onDownload={(file) => {
+              console.log(file);
+           }}
+        />
+     )}
 
       </div>
 

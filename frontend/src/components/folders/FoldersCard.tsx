@@ -1,3 +1,5 @@
+import { AppCard } from "../app";
+
 type Props = {
   id: number;
   name: string;
@@ -12,7 +14,7 @@ export default function FolderCard({
   onClick,
 }: Props) {
   return (
-    <div
+    <AppCard
       onClick={onClick}
       className="
         cursor-pointer
@@ -35,6 +37,6 @@ export default function FolderCard({
           {description}
         </p>
       )}
-    </div>
+    </AppCard>
   );
 }

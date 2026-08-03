@@ -1,4 +1,4 @@
-import { Button } from "../../components/ui/button";
+import { AppButton } from "@/components/app";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import FoldersPage from "./FoldersPage";
@@ -83,12 +83,12 @@ export default function DashboardPage() {
 
         </div>
 
-        <Button
+        <AppButton
           className="mt-8"
           onClick={logout}
         >
           Logout
-        </Button>
+        </AppButton>
 
       </main>
 

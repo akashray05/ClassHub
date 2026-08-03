@@ -6,6 +6,11 @@ export interface FileItem {
   folder_id: number;
   owner_id: number;
   created_at: string;
+  is_shared: boolean;
+  shared_with: number[];
+  download_url: string;
+  thumbnail_url?: string;
+  preview_url?: string;
 }
 
 export interface PaginatedFiles {
