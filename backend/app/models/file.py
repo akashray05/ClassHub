@@ -1,18 +1,10 @@
-
-
 from datetime import datetime
 
-from sqlalchemy import (
-    Column,
-    Integer,
-    String,
-    ForeignKey,
-    DateTime,
-    BigInteger,
-    Boolean,
-)
+from sqlalchemy import (BigInteger, Boolean, Column, DateTime, ForeignKey,
+                        Integer, String)
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
+
 from ..database.base import Base
 
 

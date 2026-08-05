@@ -1,5 +1,5 @@
-from tests.factories.folder_factory import create_folder
 from tests.factories.file_factory import create_file
+from tests.factories.folder_factory import create_folder
 
 
 def test_shared_with_me_success(
@@ -33,7 +33,7 @@ def test_shared_with_me_success(
     )
 
     assert response.status_code == 200
-    
+
     response = client.get(
         "/files/shared-with-me",
         headers=second_auth_headers,

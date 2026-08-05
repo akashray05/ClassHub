@@ -1,6 +1,6 @@
 from app.models.shared_file import SharedFile
-from tests.factories.folder_factory import create_folder
 from tests.factories.file_factory import create_file
+from tests.factories.folder_factory import create_folder
 
 
 def test_share_file_success(

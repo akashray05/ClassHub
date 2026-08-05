@@ -2,12 +2,10 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from ..models.file import File as FileModel
-
-
-
 from ..storage import get_storage
 
 storage = get_storage()
+
 
 def download_file_service(
     db: Session,
@@ -31,7 +29,6 @@ def download_file_service(
         )
 
     # path = Path(db_file.file_path)
-
 
     # )
     # if not file_exists(db_file.file_path):

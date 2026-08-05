@@ -1,5 +1,5 @@
-from tests.factories.folder_factory import create_folder
 from tests.factories.file_factory import create_file
+from tests.factories.folder_factory import create_folder
 
 
 def test_delete_file_success(
@@ -32,6 +32,7 @@ def test_delete_file_success(
     assert file.is_deleted is True
     assert file.deleted_at is not None
 
+
 def test_delete_without_token(
     client,
     db,
@@ -53,6 +54,7 @@ def test_delete_without_token(
     )
 
     assert response.status_code == 401
+
 
 def test_delete_invalid_token(
     client,
@@ -78,6 +80,7 @@ def test_delete_invalid_token(
     )
 
     assert response.status_code == 401
+
 
 def test_delete_file_not_found(
     client,

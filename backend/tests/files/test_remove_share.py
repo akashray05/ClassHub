@@ -1,5 +1,5 @@
-from tests.factories.folder_factory import create_folder
 from tests.factories.file_factory import create_file
+from tests.factories.folder_factory import create_folder
 
 
 def test_remove_share_success(
@@ -37,6 +37,7 @@ def test_remove_share_success(
     assert response.status_code == 200
     assert response.json()["message"] == "Access revoked successfully."
 
+
 def test_remove_share_without_token(client):
     response = client.delete("/files/share/1/1")
 
@@ -46,9 +47,7 @@ def test_remove_share_without_token(client):
 def test_remove_share_invalid_token(client):
     response = client.delete(
         "/files/share/1/1",
-        headers={
-            "Authorization": "Bearer invalid_token"
-        },
+        headers={"Authorization": "Bearer invalid_token"},
     )
 
     assert response.status_code == 401

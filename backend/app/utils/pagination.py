@@ -19,12 +19,7 @@ def paginate(query, page: int, limit: int):
 
     offset = (page - 1) * limit
 
-    items = (
-        query
-        .offset(offset)
-        .limit(limit)
-        .all()
-    )
+    items = query.offset(offset).limit(limit).all()
 
     return {
         "page": page,

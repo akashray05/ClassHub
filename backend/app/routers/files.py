@@ -2,65 +2,34 @@
 from pathlib import Path
 
 # Third-party
-from fastapi import (
-    APIRouter,
-    Depends,
-    UploadFile,
-    File,
-    Query,
-)
+from fastapi import APIRouter, Depends, File, Query, UploadFile
 from sqlalchemy.orm import Session
 
 # Local imports
 from ..core.auth import get_current_user
 from ..database.session import get_db
 from ..models.user import User
-
-from ..schemas.file import (
-    FileResponse,
-    FileRename,
-    PaginatedFileResponse,
-    ShareFileRequest,
-    SharedFileResponse,
-    SharedByMeResponse,
-    UpdateSharePermissionRequest,
-    SharedUser,
-)
-
-from ..services.upload_service import (
-    upload_file_service,
-    rename_file_service,
-)
-from ..services.download_service import (
-    download_file_service,
-)
-from ..services.listing_service import (
-    search_files_service,
-    get_folder_files_service,
-    get_trash_files_service,
-)
-
-from ..services.trash_service import (
-    delete_file_service,
-    restore_file_service,
-    permanently_delete_file_service,
-    
-)
-
-from ..services.share_service import (
-    share_file_service,
-    get_shared_with_me_service,
-    get_shared_by_me_service,
-    download_shared_file_service,
-    remove_share_service,
-    update_share_permission_service,
-)
+from ..schemas.file import (FileRename, FileResponse, PaginatedFileResponse,
+                            SharedByMeResponse, SharedFileResponse, SharedUser,
+                            ShareFileRequest, UpdateSharePermissionRequest)
+from ..services.download_service import download_file_service
+from ..services.listing_service import (get_folder_files_service,
+                                        get_trash_files_service,
+                                        search_files_service)
+from ..services.share_service import (download_shared_file_service,
+                                      get_shared_by_me_service,
+                                      get_shared_with_me_service,
+                                      remove_share_service, share_file_service,
+                                      update_share_permission_service)
+from ..services.trash_service import (delete_file_service,
+                                      permanently_delete_file_service,
+                                      restore_file_service)
+from ..services.upload_service import rename_file_service, upload_file_service
 
 router = APIRouter(
     prefix="/files",
     tags=["Files"],
 )
-
 
 
 @router.post("/upload", response_model=FileResponse)
@@ -89,7 +58,6 @@ def download_file(
         current_user=current_user,
         file_id=file_id,
     )
-
 
 
 @router.get("/folder/{folder_id}", response_model=PaginatedFileResponse)
@@ -146,6 +114,7 @@ def get_trash_files(
         limit=limit,
     )
 
+
 @router.delete("/{file_id}")
 def delete_file(
     file_id: int,
@@ -176,6 +145,7 @@ def rename_file(
         original_name=file_data.original_name,
     )
 
+
 @router.put("/restore/{file_id}")
 def restore_file(
     file_id: int,
@@ -188,6 +158,7 @@ def restore_file(
         file_id=file_id,
     )
 
+
 @router.delete("/permanent/{file_id}")
 def permanently_delete_file(
     file_id: int,
@@ -199,6 +170,7 @@ def permanently_delete_file(
         current_user=current_user,
         file_id=file_id,
     )
+
 
 @router.post("/{file_id}/share")
 def share_file(
@@ -215,8 +187,8 @@ def share_file(
         can_download=request.can_download,
     )
 
-@router.get("/shared-with-me")
 
+@router.get("/shared-with-me")
 def shared_with_me(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -225,6 +197,7 @@ def shared_with_me(
         db,
         current_user,
     )
+
 
 @router.get(
     "/shared-by-me",
@@ -239,6 +212,7 @@ def shared_by_me(
         current_user=current_user,
     )
 
+
 @router.get("/shared-download/{file_id}")
 def download_shared_file(
     file_id: int,
@@ -250,6 +224,7 @@ def download_shared_file(
         current_user=current_user,
         file_id=file_id,
     )
+
 
 @router.delete("/share/{file_id}/{user_id}")
 def remove_share(
@@ -264,6 +239,8 @@ def remove_share(
         file_id=file_id,
         user_id=user_id,
     )
+
+
 @router.patch("/share/{file_id}/{user_id}")
 def update_share_permission(
     file_id: int,

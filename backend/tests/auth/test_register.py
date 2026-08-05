@@ -16,6 +16,7 @@ def test_register_success(client):
     assert data["name"] == "Akash"
     assert data["email"] == "akash@example.com"
 
+
 def test_register_duplicate_email(client):
     payload = {
         "name": "Akash",
@@ -35,6 +36,7 @@ def test_register_duplicate_email(client):
     assert data["success"] is False
     assert data["status"] == 400
     assert data["message"] == "Email already registered"
+
 
 # def test_register_duplicate_email(client):
 #     payload = {

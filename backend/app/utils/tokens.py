@@ -23,6 +23,7 @@ def verification_token_expiry(hours: int = 24) -> datetime:
     """
     return datetime.now(timezone.utc) + timedelta(hours=hours)
 
+
 def generate_hashed_token():
     """
     Generate a secure token and its SHA-256 hash.

@@ -1,9 +1,6 @@
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict
 
-
-from pydantic import Field
-
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class FileResponse(BaseModel):
@@ -15,19 +12,18 @@ class FileResponse(BaseModel):
     folder_id: int
     owner_id: int
     created_at: datetime
+    # download_url: str
+    
 
     model_config = ConfigDict(from_attributes=True)
-
 
 
 class FileRename(BaseModel):
     original_name: str
     original_name: str = Field(
-    min_length=1,
-    max_length=255,
-)
-
-
+        min_length=1,
+        max_length=255,
+    )
 
 
 class PaginatedFileResponse(BaseModel):
@@ -37,9 +33,11 @@ class PaginatedFileResponse(BaseModel):
     pages: int
     files: list[FileResponse]
 
+
 class ShareFileRequest(BaseModel):
     shared_with_id: int
     can_download: bool = True
+
 
 class SharedFileResponse(BaseModel):
     file_id: int
@@ -51,6 +49,7 @@ class SharedFileResponse(BaseModel):
     can_download: bool
 
     model_config = ConfigDict(from_attributes=True)
+
 
 class SharedUser(BaseModel):
     id: int
@@ -64,6 +63,7 @@ class SharedByMeResponse(BaseModel):
     file_id: int
     original_name: str
     shared_with: list[SharedUser]
+
 
 class UpdateSharePermissionRequest(BaseModel):
     can_download: bool

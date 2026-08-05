@@ -1,0 +1,1 @@
+export { usePDFContext as usePDF } from "../context/PDFContext";

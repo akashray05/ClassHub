@@ -4,19 +4,13 @@ from sqlalchemy.orm import Session
 from ..models.file import File
 from ..models.shared_file import SharedFile
 from ..models.user import User
-
-from ..utils.file_utils import (
-    get_file_by_id,
-    get_owned_file,
-)
-
-from ..utils.permissions import (
-    verify_download_permission,
-)
-
 from ..storage import get_storage
+from ..utils.file_utils import get_file_by_id, get_owned_file
+from ..utils.permissions import verify_download_permission
 
 storage = get_storage()
+
+
 def share_file_service(
     db: Session,
     file_id: int,
@@ -42,11 +36,7 @@ def share_file_service(
         )
 
     # Check recipient exists
-    recipient = (
-        db.query(User)
-        .filter(User.id == shared_with_id)
-        .first()
-    )
+    recipient = db.query(User).filter(User.id == shared_with_id).first()
 
     if not recipient:
         raise HTTPException(
@@ -88,9 +78,7 @@ def share_file_service(
     db.commit()
     db.refresh(share)
 
-    return {
-        "message": "File shared successfully"
-    }
+    return {"message": "File shared successfully"}
 
 
 def get_shared_with_me_service(
@@ -124,6 +112,7 @@ def get_shared_with_me_service(
         )
 
     return shared_files
+
 
 def get_shared_by_me_service(
     db: Session,
@@ -170,6 +159,7 @@ def get_shared_by_me_service(
 
     return result
 
+
 def download_shared_file_service(
     db: Session,
     current_user: User,
@@ -188,9 +178,9 @@ def download_shared_file_service(
         #     mime_type=file.mime_type,
         # )
         return storage.get_file_response(
-        file_path=file.file_path,
-        filename=file.original_name,
-        mime_type=file.mime_type,
+            file_path=file.file_path,
+            filename=file.original_name,
+            mime_type=file.mime_type,
         )
 
     except HTTPException:
@@ -212,7 +202,6 @@ def download_shared_file_service(
         filename=file.original_name,
         mime_type=file.mime_type,
     )
-
 
 
 def remove_share_service(

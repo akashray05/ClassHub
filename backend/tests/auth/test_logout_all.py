@@ -9,12 +9,11 @@ def test_logout_all_success(client, auth_headers, login_response):
     # Old refresh token should no longer work
     refresh = client.post(
         "/auth/refresh",
-        json={
-            "refresh_token": login_response["refresh_token"]
-        },
+        json={"refresh_token": login_response["refresh_token"]},
     )
 
     assert refresh.status_code == 401
+
 
 def test_logout_all_without_token(client):
     response = client.post("/auth/logout-all")
@@ -22,14 +21,10 @@ def test_logout_all_without_token(client):
     assert response.status_code == 401
 
 
-
 def test_logout_all_invalid_token(client):
     response = client.post(
         "/auth/logout-all",
-        headers={
-            "Authorization": "Bearer invalid-token"
-        },
+        headers={"Authorization": "Bearer invalid-token"},
     )
 
     assert response.status_code == 401
-

@@ -1,18 +1,23 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { UploadQueue } from "@/features/upload";
+import {
+  PreviewDialog,
+  usePreview,
+} from "@/features/preview";
 
 import { useUpload } from "@/hooks/useUpload";
-import { UploadDropzone } from "@/components/files";
+import { getDownloadUrl } from "@/services/download";
 
-// import { UploadDropzone } from "../../components/files/UploadDropzone";
-import { getFolderFiles } from "../../services/file";
-import type { FileItem } from "../../types/file";
 import {
+  UploadDropzone,
   EmptyFiles,
   FileGrid,
   FileToolbar,
 } from "@/components/files";
 
+import { getFolderFiles } from "@/services/file";
+import type { FileItem } from "@/types/file";
 
 export default function FileExplorerPage() {
   const { folderId } = useParams();
@@ -20,14 +25,15 @@ export default function FileExplorerPage() {
   const [files, setFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [gridView, setGridView] = useState(true);
 
-  const { uploading, upload } = useUpload({
-  folderId: Number(folderId),
-  onSuccess: loadFiles,
-  });
+  const {
+    selectedFile,
+    isOpen,
+    openPreview,
+    closePreview,
+  } = usePreview();
 
-  const [gridView, setGridView] =
-    useState(true);
   async function loadFiles() {
     if (!folderId) return;
 
@@ -41,59 +47,96 @@ export default function FileExplorerPage() {
     }
   }
 
+  const {
+    upload,
+    uploads,
+  } = useUpload({
+    folderId: Number(folderId),
+    onSuccess: loadFiles,
+  });
+
   useEffect(() => {
     loadFiles();
   }, [folderId]);
 
   if (loading) {
-    return <p>Loading...</p>;
+    return (
+      <div className="p-10 text-white">
+        Loading...
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white p-10">
+    <>
+      <div className="min-h-screen bg-slate-950 p-10 text-white">
+        <h1 className="mb-8 text-4xl font-bold text-cyan-400">
+          Folder #{folderId}
+        </h1>
 
-      <h1 className="text-4xl font-bold text-cyan-400 mb-8">
-        Folder #{folderId}
-      </h1>
-
-      <UploadDropzone
-        onFilesSelected={upload}
-      />
-      <FileToolbar
-        search={search}
-        onSearchChange={setSearch}
-        gridView={gridView}
-        onToggleView={() =>
-        setGridView((v) => !v)
-        }
-        onUpload={() => {
-          console.log("upload");
-       }}
-      />
-
-
-
-
-      <div className="mt-8">
-
-        {files.length === 0 ? (
-           <EmptyFiles
-               onUpload={() => {
-                  console.log("Upload clicked");
-              }}
-           />
-      ) : (
-         <FileGrid
-           files={files}
-           onDownload={(file) => {
-              console.log(file);
-           }}
+        <UploadDropzone
+          onFilesSelected={upload}
         />
-     )}
+        <UploadQueue
+           uploads={uploads}
+           onRemove={() => {}}
+        />
 
+        <FileToolbar
+          search={search}
+          onSearchChange={setSearch}
+          gridView={gridView}
+          onToggleView={() =>
+            setGridView((v) => !v)
+          }
+          onUpload={() => {
+            console.log("Upload button clicked");
+          }}
+        />
+
+        <div className="mt-8">
+          {files.length === 0 ? (
+            <EmptyFiles
+              onUpload={() => {
+                console.log("Upload clicked");
+              }}
+            />
+          ) : (
+            <FileGrid
+              files={files}
+              onDownload={(file) => {
+                console.log("Download", file);
+              }}
+              onOpen={(file) => {
+                console.log(
+                  "Opening preview",
+                  file,
+                );
+
+                openPreview({
+                  id: file.id,
+                  original_name:
+                    file.original_name,
+                  file_size: file.file_size,
+                  mime_type: file.mime_type,
+                  download_url:
+                    getDownloadUrl(file.id),
+                });
+              }}
+            />
+          )}
+        </div>
       </div>
 
-     
-    </div>
+      <PreviewDialog
+  open={isOpen}
+  file={selectedFile}
+  onOpenChange={(open) => {
+    if (!open) {
+      closePreview();
+    }
+  }}
+/>
+    </>
   );
 }

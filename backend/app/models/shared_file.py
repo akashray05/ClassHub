@@ -1,15 +1,10 @@
 from datetime import datetime
 
-from sqlalchemy import (
-    Boolean,
-    Column,
-    DateTime,
-    ForeignKey,
-    Integer,
-    UniqueConstraint,
-)
+from sqlalchemy import (Boolean, Column, DateTime, ForeignKey, Integer,
+                        UniqueConstraint)
 
 from ..database.base import Base
+
 
 class SharedFile(Base):
     __tablename__ = "shared_files"

@@ -1,7 +1,8 @@
-from datetime import datetime, UTC
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import JSONResponse
+from datetime import UTC, datetime
+
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 
 
 def register_exception_handlers(app: FastAPI):

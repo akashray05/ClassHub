@@ -1,4 +1,4 @@
-from . import auth, users, folders, files, admin
+from . import admin, auth, files, folders, users
 
 __all__ = [
     "auth",

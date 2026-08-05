@@ -1,19 +1,12 @@
-from sqlalchemy.sql import func
-from sqlalchemy import (
-    Column,
-    Integer,
-    String,
-    Boolean,
-    DateTime,
-    BigInteger,
-)
-from ..database.base import Base
+from sqlalchemy import BigInteger, Boolean, Column, DateTime, Integer, String
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+
+from ..database.base import Base
+
 
 class User(Base):
     __tablename__ = "users"
-
-
 
     id = Column(Integer, primary_key=True, index=True)
 
@@ -51,8 +44,6 @@ class User(Base):
         DateTime(timezone=True),
         nullable=True,
     )
-        
-    
 
     verification_token_hash = Column(
         String(255),
@@ -78,12 +69,14 @@ class User(Base):
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    folders = relationship("Folder", back_populates="owner",cascade="all, delete-orphan")
+    folders = relationship(
+        "Folder", back_populates="owner", cascade="all, delete-orphan"
+    )
 
     files = relationship(
-    "File",
-    back_populates="owner",
-    cascade="all, delete-orphan", 
+        "File",
+        back_populates="owner",
+        cascade="all, delete-orphan",
     )
 
     refresh_tokens = relationship(

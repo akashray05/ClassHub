@@ -3,13 +3,13 @@ from sqlalchemy.orm import Session
 
 from ..core.logger import logger
 from ..models.file import File
-from ..models.folder import Folder
 from ..models.file import File as FileModel
-
+from ..models.folder import Folder
 from ..storage import get_storage
 
-
 storage = get_storage()
+
+
 async def upload_file_service(
     db: Session,
     current_user,
@@ -44,7 +44,6 @@ async def upload_file_service(
             status_code=413,
             detail="Storage quota exceeded",
         )
-    
 
     # stored_name, file_path, file_size = save_file(
     #     current_user=current_user,
@@ -52,9 +51,9 @@ async def upload_file_service(
     #     file=file,
     # )
     stored_name, file_path, file_size = storage.save_file(
-    current_user=current_user,
-    folder_id=folder_id,
-    file=file,
+        current_user=current_user,
+        folder_id=folder_id,
+        file=file,
     )
 
     db_file = File(
@@ -83,7 +82,6 @@ async def upload_file_service(
     )
 
     return db_file
-
 
 
 def rename_file_service(

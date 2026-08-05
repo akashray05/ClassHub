@@ -1,7 +1,7 @@
 import { getPreviewType } from "../utils/getPreviewType";
 import type { PreviewFile } from "../types/preview";
 
-import { PDFPreview } from "./PDFPreview";
+import { PDFViewer } from "../pdf";
 import { ImagePreview } from "./ImagePreview";
 import { VideoPreview } from "./VideoPreview";
 import { AudioPreview } from "./AudioPreview";
@@ -19,24 +19,24 @@ export function FilePreview({
   );
 
   const registry = {
-  pdf: <PDFPreview file={file} />,
-  image: <ImagePreview file={file} />,
-  video: <VideoPreview file={file} />,
-  audio: <AudioPreview file={file} />,
-  text: <TextPreview file={file} />,
+    pdf: <PDFViewer file={file} />,
 
-  unknown: (
-    <div className="p-10 text-center text-slate-400">
-      Preview not available.
-    </div>
-  ),
-};
+    image: <ImagePreview file={file} />,
 
-  return (
-    registry[previewType] ?? (
-      <div className="p-10 text-center text-slate-400">
+    video: <VideoPreview file={file} />,
+
+    audio: <AudioPreview file={file} />,
+
+    text: <TextPreview file={file} />,
+
+    unknown: (
+      <div className="flex h-full items-center justify-center text-slate-400">
         Preview not available.
       </div>
-    )
+    ),
+  };
+
+  return (
+    registry[previewType] ?? registry.unknown
   );
 }

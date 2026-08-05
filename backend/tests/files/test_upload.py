@@ -1,11 +1,8 @@
 from io import BytesIO
 
-from tests.factories.folder_factory import create_folder
-
 from app.models.file import File
-
-
 from app.models.user import User
+from tests.factories.folder_factory import create_folder
 
 
 def test_upload_success(
@@ -57,13 +54,10 @@ def test_upload_without_token(client):
     assert response.status_code == 401
 
 
-
 def test_upload_invalid_token(client):
     response = client.post(
         "/files/upload?folder_id=1",
-        headers={
-            "Authorization": "Bearer invalidtoken"
-        },
+        headers={"Authorization": "Bearer invalidtoken"},
         files={
             "file": (
                 "notes.txt",
@@ -74,7 +68,6 @@ def test_upload_invalid_token(client):
     )
 
     assert response.status_code == 401
-
 
 
 # def test_upload_folder_not_found(
@@ -92,6 +85,7 @@ def test_upload_invalid_token(client):
 #             )
 #         },
 #     )
+
 
 #     assert response.status_code == 404
 #     assert response.json()["detail"] == "Folder not found"
@@ -115,7 +109,6 @@ def test_upload_folder_not_found(
     print(response.text)
 
     assert response.status_code == 404
-
 
 
 def test_upload_storage_quota_exceeded(
@@ -149,12 +142,13 @@ def test_upload_storage_quota_exceeded(
     )
 
     assert response.status_code == 413
-    assert response.json()["message"] == "Storage quota exceeded"    
+    assert response.json()["message"] == "Storage quota exceeded"
     # print(response.status_code)
     # print(response.text)
+
+
 # # or
 # print(response.json())
-
 
 
 def test_file_saved_in_database(
@@ -184,16 +178,11 @@ def test_file_saved_in_database(
 
     assert response.status_code == 200
 
-    db_file = (
-        db.query(File)
-        .filter(File.original_name == filename)
-        .first()
-    )
+    db_file = db.query(File).filter(File.original_name == filename).first()
 
     assert db_file is not None
     assert db_file.owner_id == db_user.id
     assert db_file.folder_id == folder.id
-
 
 
 def test_storage_used_updated(

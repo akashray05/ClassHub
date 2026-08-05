@@ -1,5 +1,5 @@
-from tests.factories.folder_factory import create_folder
 from tests.factories.file_factory import create_file
+from tests.factories.folder_factory import create_folder
 
 
 def test_permanent_delete_success(
@@ -36,11 +36,7 @@ def test_permanent_delete_success(
 
     from app.models.file import File
 
-    deleted = (
-        db.query(File)
-        .filter(File.id == file.id)
-        .first()
-    )
+    deleted = db.query(File).filter(File.id == file.id).first()
 
     assert deleted is None
 

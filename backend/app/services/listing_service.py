@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 
 from ..models.file import File as FileModel
 from ..models.folder import Folder
-
 from ..utils.pagination import paginate
 
 
@@ -17,23 +16,18 @@ def search_files_service(
     limit: int,
 ):
 
-    search_query = (
-        db.query(FileModel)
-        .filter(
-            FileModel.owner_id == current_user.id,
-            FileModel.is_deleted == False,
-            FileModel.original_name.ilike(f"%{query}%"),
-        )
+    search_query = db.query(FileModel).filter(
+        FileModel.owner_id == current_user.id,
+        FileModel.is_deleted == False,
+        FileModel.original_name.ilike(f"%{query}%"),
     )
-
 
     total = search_query.count()
 
     offset = (page - 1) * limit
 
     files = (
-        search_query
-        .order_by(FileModel.created_at.desc())
+        search_query.order_by(FileModel.created_at.desc())
         .offset(offset)
         .limit(limit)
         .all()
@@ -46,6 +40,7 @@ def search_files_service(
         "pages": ceil(total / limit) if total else 1,
         "files": files,
     }
+
 
 def get_folder_files_service(
     db: Session,
@@ -69,13 +64,10 @@ def get_folder_files_service(
             detail="Folder not found",
         )
 
-    query = (
-        db.query(FileModel)
-        .filter(
-            FileModel.folder_id == folder_id,
-            FileModel.owner_id == current_user.id,
-            FileModel.is_deleted == False,
-        )
+    query = db.query(FileModel).filter(
+        FileModel.folder_id == folder_id,
+        FileModel.owner_id == current_user.id,
+        FileModel.is_deleted == False,
     )
     result = paginate(
         query.order_by(FileModel.created_at.desc()),
@@ -91,18 +83,16 @@ def get_folder_files_service(
         "files": result["items"],
     }
 
+
 def get_trash_files_service(
     db: Session,
     current_user,
     page: int,
     limit: int,
 ):
-    query = (
-        db.query(FileModel)
-        .filter(
-            FileModel.owner_id == current_user.id,
-            FileModel.is_deleted == True,
-        )
+    query = db.query(FileModel).filter(
+        FileModel.owner_id == current_user.id,
+        FileModel.is_deleted == True,
     )
 
     result = paginate(

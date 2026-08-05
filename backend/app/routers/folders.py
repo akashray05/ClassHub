@@ -1,21 +1,17 @@
-
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
-
-from ..schemas.folder import FolderUpdate
 from sqlalchemy.orm import Session
 
+from ..core.auth import get_current_user
 from ..database.session import get_db
 from ..models.folder import Folder
 from ..models.user import User
-from ..schemas.folder import FolderCreate, FolderResponse
-from ..core.auth import get_current_user
+from ..schemas.folder import FolderCreate, FolderResponse, FolderUpdate
 
 router = APIRouter(
     prefix="/folders",
     tags=["Folders"],
 )
-
 
 
 @router.post("/", response_model=FolderResponse)
@@ -39,8 +35,7 @@ def create_folder(
 
 @router.get("/", response_model=list[FolderResponse])
 def get_folders(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
 ):
     folders = (
         db.query(Folder)
@@ -51,6 +46,7 @@ def get_folders(
 
     return folders
 
+
 @router.put("/{folder_id}", response_model=FolderResponse)
 def update_folder(
     folder_id: int,
@@ -60,18 +56,12 @@ def update_folder(
 ):
     db_folder = (
         db.query(Folder)
-        .filter(
-            Folder.id == folder_id,
-            Folder.owner_id == current_user.id
-        )
+        .filter(Folder.id == folder_id, Folder.owner_id == current_user.id)
         .first()
     )
 
     if db_folder is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Folder not found"
-        )
+        raise HTTPException(status_code=404, detail="Folder not found")
 
     db_folder.name = folder.name
 
@@ -110,7 +100,5 @@ def delete_folder(
 
     return JSONResponse(
         status_code=200,
-        content={
-            "message": "Folder deleted successfully"
-        },
+        content={"message": "Folder deleted successfully"},
     )

@@ -1,16 +1,17 @@
-from datetime import datetime, timedelta, timezone
 import hashlib
 import secrets
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from pathlib import Path
 from sqlalchemy.orm import Session
 
-from .config import settings
 from ..database.session import get_db
 from ..models.user import User
+from .config import settings
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -40,9 +41,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def create_access_token(data: dict):
     to_encode = data.copy()
 
-    expire = datetime.now(timezone.utc) + timedelta(
-        minutes=ACCESS_TOKEN_EXPIRE_MINUTES
-    )
+    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
 
     to_encode.update({"exp": expire})
 
@@ -53,9 +52,7 @@ def create_access_token(data: dict):
     )
 
 
-oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl="/auth/login"
-)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
 def get_current_user(
@@ -83,16 +80,13 @@ def get_current_user(
     except JWTError:
         raise credentials_exception
 
-    user = (
-        db.query(User)
-        .filter(User.email == email)
-        .first()
-    )
+    user = db.query(User).filter(User.email == email).first()
 
     if user is None:
         raise credentials_exception
 
     return user
+
 
 def create_refresh_token():
     """

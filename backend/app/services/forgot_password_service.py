@@ -1,13 +1,9 @@
 from sqlalchemy.orm import Session
 
 from app.models.user import User
-from app.utils.tokens import (
-    generate_hashed_token,
-    verification_token_expiry,
-)
-from app.services.notification_service import (
-    send_password_reset_email,
-)
+from app.services.notification_service import send_password_reset_email
+from app.utils.tokens import generate_hashed_token, verification_token_expiry
+
 
 def forgot_password_service(
     db: Session,
@@ -18,19 +14,13 @@ def forgot_password_service(
     revealing whether an email exists.
     """
 
-    user = (
-        db.query(User)
-        .filter(User.email == email)
-        .first()
-    )
+    user = db.query(User).filter(User.email == email).first()
 
     if user:
         token, token_hash = generate_hashed_token()
 
         user.password_reset_token_hash = token_hash
-        user.password_reset_token_expires_at = (
-            verification_token_expiry()
-        )
+        user.password_reset_token_expires_at = verification_token_expiry()
 
         db.commit()
 

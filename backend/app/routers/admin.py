@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+
 from ..dependencies import get_current_admin
 from ..models.user import User
 
@@ -12,6 +13,4 @@ router = APIRouter(
 def dashboard(
     admin: User = Depends(get_current_admin),
 ):
-    return {
-        "message": f"Welcome {admin.name}"
-    }
+    return {"message": f"Welcome {admin.name}"}

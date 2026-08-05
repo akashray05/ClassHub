@@ -1,4 +1,4 @@
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
@@ -10,11 +10,7 @@ from app.utils.tokens import hash_token
 def verify_email_service(db: Session, token: str):
     token_hash = hash_token(token)
 
-    user = (
-        db.query(User)
-        .filter(User.verification_token_hash == token_hash)
-        .first()
-    )
+    user = db.query(User).filter(User.verification_token_hash == token_hash).first()
 
     if not user:
         raise HTTPException(
@@ -23,9 +19,7 @@ def verify_email_service(db: Session, token: str):
         )
 
     if user.is_verified:
-        return {
-            "message": "Email already verified"
-        }
+        return {"message": "Email already verified"}
 
     if (
         user.verification_token_expires_at
@@ -42,6 +36,4 @@ def verify_email_service(db: Session, token: str):
 
     db.commit()
 
-    return {
-        "message": "Email verified successfully"
-    }
+    return {"message": "Email verified successfully"}

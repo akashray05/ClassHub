@@ -8,7 +8,6 @@ type Props = {
 };
 
 export default function FolderCard({
-  id,
   name,
   description,
   onClick,

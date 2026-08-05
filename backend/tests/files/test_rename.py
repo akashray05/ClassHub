@@ -1,10 +1,9 @@
 from io import BytesIO
 
 from app.models.file import File
+from tests.factories.file_factory import create_file
 from tests.factories.folder_factory import create_folder
 
-
-from tests.factories.file_factory import create_file
 # def test_rename_file_success(
 #     client,
 #     db,
@@ -15,7 +14,7 @@ from tests.factories.file_factory import create_file
 #         db=db,
 #         owner=db_user,
 #     )
-    
+
 
 #     upload = client.post(
 #         f"/files/upload?folder_id={folder.id}",
@@ -59,6 +58,7 @@ from tests.factories.file_factory import create_file
 
 #     assert db_file.original_name == "new_name.txt"
 
+
 def test_rename_file_success(
     client,
     db,
@@ -89,6 +89,8 @@ def test_rename_file_success(
     db.refresh(file)
 
     assert file.original_name == "new_name.txt"
+
+
 def test_rename_without_token(
     client,
     db,
@@ -116,6 +118,7 @@ def test_rename_without_token(
     # Upload won't work without auth, so create a file another way if needed.
     # Simpler approach: use an existing fixture later.
 
+
 def test_rename_file_not_found(
     client,
     auth_headers,
@@ -130,6 +133,7 @@ def test_rename_file_not_found(
 
     assert response.status_code == 404
     assert response.json()["message"] == "File not found"
+
 
 def test_rename_invalid_token(
     client,

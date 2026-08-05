@@ -22,9 +22,7 @@ def test_get_me_without_token(client):
 def test_get_me_invalid_token(client):
     response = client.get(
         "/users/me",
-        headers={
-            "Authorization": "Bearer invalid-token"
-        },
+        headers={"Authorization": "Bearer invalid-token"},
     )
 
     assert response.status_code == 401

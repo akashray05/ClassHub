@@ -1,37 +1,25 @@
 from datetime import datetime, timedelta, timezone
+
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
-
-from ..database.session import get_db
-from ..models.user import User
-from ..models.refresh_token import RefreshToken
-from ..schemas.user import (
-    Token,
-    RefreshTokenRequest,
-)
-
 from sqlalchemy.orm import Session
 
-from ..dependencies import get_current_user
-
-from ..core.auth import (
-    verify_password,
-    create_access_token,
-    create_refresh_token,
-    hash_refresh_token,
-)
+from ..core.auth import (create_access_token, create_refresh_token,
+                         hash_refresh_token, verify_password)
 from ..core.config import settings
+from ..database.session import get_db
+from ..dependencies import get_current_user
+from ..models.refresh_token import RefreshToken
+from ..models.user import User
+from ..schemas.user import RefreshTokenRequest, Token
+from ..services.auth_service import (logout_all_service, logout_service,
+                                     refresh_token_service)
 
-
-from ..services.auth_service import (
-    refresh_token_service,
-    logout_all_service,
-    logout_service,
-)
 router = APIRouter(
     prefix="/auth",
     tags=["Authentication"],
 )
+
 
 @router.post("/login", response_model=Token)
 def login(
@@ -39,28 +27,15 @@ def login(
     db: Session = Depends(get_db),
 ):
 
-    db_user = db.query(User).filter(
-        User.email == form_data.username
-    ).first()
+    db_user = db.query(User).filter(User.email == form_data.username).first()
 
     if not db_user:
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid email or password"
-        )
+        raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    if not verify_password(
-        form_data.password,
-        db_user.password
-    ):
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid email or password"
-        )
+    if not verify_password(form_data.password, db_user.password):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    access_token = create_access_token(
-        {"sub": db_user.email}
-    )
+    access_token = create_access_token({"sub": db_user.email})
 
     # Revoke previous refresh tokens
     db.query(RefreshToken).filter(
@@ -72,7 +47,6 @@ def login(
     )
 
     refresh_token = create_refresh_token()
-
 
     db_refresh_token = RefreshToken(
         user_id=db_user.id,
@@ -100,6 +74,7 @@ def refresh_token(
         db=db,
         refresh_token=request.refresh_token,
     )
+
 
 @router.post("/logout")
 def logout(

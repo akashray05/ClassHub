@@ -1,5 +1,4 @@
-
-from datetime import datetime, timedelta, UTC
+from datetime import UTC, datetime, timedelta
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
@@ -8,6 +7,7 @@ from ..models.file import File as FileModel
 from ..storage import get_storage
 
 storage = get_storage()
+
 
 def delete_file_service(
     db: Session,
@@ -29,17 +29,13 @@ def delete_file_service(
             detail="File not found",
         )
 
-
     db_file.is_deleted = True
     db_file.deleted_at = datetime.now(UTC)
 
     db.commit()
     db.refresh(db_file)
 
-    return {
-        "message": "File moved to trash successfully"
-    }
-
+    return {"message": "File moved to trash successfully"}
 
 
 def restore_file_service(
@@ -69,9 +65,8 @@ def restore_file_service(
     db.commit()
     db.refresh(db_file)
 
-    return {
-        "message": "File restored successfully"
-    }
+    return {"message": "File restored successfully"}
+
 
 def permanently_delete_file_service(
     db: Session,
@@ -98,7 +93,7 @@ def permanently_delete_file_service(
 
     current_user.storage_used -= db_file.file_size
 
-# Safety check
+    # Safety check
     if current_user.storage_used < 0:
         current_user.storage_used = 0
     storage.delete_file(db_file.file_path)
@@ -107,6 +102,4 @@ def permanently_delete_file_service(
     db.delete(db_file)
     db.commit()
 
-    return {
-        "message": "File permanently deleted successfully"
-    }
+    return {"message": "File permanently deleted successfully"}

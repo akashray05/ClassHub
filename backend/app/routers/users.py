@@ -1,63 +1,37 @@
+from datetime import timedelta, timezone
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+
+from app.schemas.user import StorageInfo
+from app.services.notification_service import send_verification_email
+from app.services.user_service import get_storage_info
+
+from ..core.auth import create_access_token, hash_password
+from ..database.session import get_db
 from ..dependencies import get_current_user
 from ..models.user import User
 from ..schemas.user import UserCreate, UserResponse
-from ..core.auth import hash_password
-from ..core.auth import (
-    hash_password,
-    create_access_token
-)
-from app.services.notification_service import send_verification_email
-from ..database.session import get_db
-from datetime import timedelta, timezone
 
-
-from ..schemas.user import (
-    UserCreate,
-    UserResponse,
-)
-from app.schemas.user import StorageInfo
-from app.services.user_service import get_storage_info
-
-router = APIRouter(
-    prefix="/users",
-    tags=["Users"]
-)
+router = APIRouter(prefix="/users", tags=["Users"])
+from app.schemas.user import (ForgotPasswordRequest, ResendVerificationRequest,
+                              ResetPasswordRequest)
 from app.services.email_verification_service import verify_email_service
-from ..utils.tokens import (
-    generate_hashed_token,
-    verification_token_expiry,
-)
+from app.services.forgot_password_service import forgot_password_service
+from app.services.resend_verification_service import \
+    resend_verification_service
+from app.services.reset_password_service import reset_password_service
 
+from ..utils.tokens import generate_hashed_token, verification_token_expiry
 
-from app.schemas.user import ResendVerificationRequest
-from app.services.resend_verification_service import (
-    resend_verification_service,
-)
-
-from app.schemas.user import ForgotPasswordRequest
-from app.services.forgot_password_service import (
-    forgot_password_service,
-)
-
-from app.schemas.user import ResetPasswordRequest
-from app.services.reset_password_service import (
-    reset_password_service,
-)
 
 @router.post("/register", response_model=UserResponse)
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
 
-    existing_user = db.query(User).filter(
-        User.email == user.email
-    ).first()
+    existing_user = db.query(User).filter(User.email == user.email).first()
 
     if existing_user:
-        raise HTTPException(
-            status_code=400,
-            detail="Email already registered"
-        )
+        raise HTTPException(status_code=400, detail="Email already registered")
 
     verification_token, verification_token_hash = generate_hashed_token()
     new_user = User(
@@ -65,7 +39,7 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
         email=user.email,
         password=hash_password(user.password),
         is_verified=False,
-        verification_token_hash=verification_token_hash,        
+        verification_token_hash=verification_token_hash,
         verification_token_expires_at=verification_token_expiry(),
     )
 
@@ -86,6 +60,7 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
 
     return new_user
 
+
 @router.get("/verify-email")
 def verify_email(
     token: str,
@@ -100,6 +75,7 @@ def get_me(
 ):
     return current_user
 
+
 @router.get(
     "/storage",
     response_model=StorageInfo,
@@ -108,6 +84,7 @@ def get_storage(
     current_user: User = Depends(get_current_user),
 ):
     return get_storage_info(current_user)
+
 
 @router.post("/resend-verification")
 def resend_verification(
@@ -129,6 +106,7 @@ def forgot_password(
         db,
         request.email,
     )
+
 
 @router.post("/reset-password")
 def reset_password(

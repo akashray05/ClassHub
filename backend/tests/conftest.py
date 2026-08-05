@@ -1,17 +1,12 @@
 import pytest
-
 from fastapi.testclient import TestClient
 from sqlalchemy import text
 
-from app.main import app
 from app.database.base import Base
 from app.database.session import get_db
-
-from tests.database import (
-    engine,
-    TestingSessionLocal,
-)
+from app.main import app
 from app.models.user import User
+from tests.database import TestingSessionLocal, engine
 from tests.factories.folder_factory import create_folder
 
 
@@ -37,9 +32,7 @@ def clean_database():
 
     try:
         for table in reversed(Base.metadata.sorted_tables):
-            db.execute(
-                text(f'TRUNCATE TABLE "{table.name}" RESTART IDENTITY CASCADE')
-            )
+            db.execute(text(f'TRUNCATE TABLE "{table.name}" RESTART IDENTITY CASCADE'))
 
         db.commit()
 
@@ -75,7 +68,6 @@ def client():
         yield c
 
 
-
 @pytest.fixture
 def registered_user(client):
     email = "akash@example.com"
@@ -98,6 +90,7 @@ def registered_user(client):
 
     return user
 
+
 @pytest.fixture
 def login_response(client, registered_user):
     response = client.post(
@@ -112,6 +105,7 @@ def login_response(client, registered_user):
 
     return response.json()
 
+
 @pytest.fixture
 def access_token(login_response):
     return login_response["access_token"]
@@ -119,9 +113,7 @@ def access_token(login_response):
 
 @pytest.fixture
 def auth_headers(access_token):
-    return {
-        "Authorization": f"Bearer {access_token}"
-    }
+    return {"Authorization": f"Bearer {access_token}"}
 
 
 # @pytest.fixture
@@ -138,13 +130,11 @@ def auth_headers(access_token):
 
 #     return user
 
+
 @pytest.fixture
 def db_user(db, registered_user):
-    return (
-        db.query(User)
-        .filter(User.email == registered_user["email"])
-        .first()
-    )
+    return db.query(User).filter(User.email == registered_user["email"]).first()
+
 
 @pytest.fixture
 def user_folder(db, db_user):
@@ -152,6 +142,7 @@ def user_folder(db, db_user):
         db=db,
         owner=db_user,
     )
+
 
 @pytest.fixture
 def second_registered_user(client):
@@ -192,14 +183,9 @@ def second_login_response(client, second_registered_user):
 
 @pytest.fixture
 def second_auth_headers(second_login_response):
-    return {
-        "Authorization": f"Bearer {second_login_response['access_token']}"
-    }
+    return {"Authorization": f"Bearer {second_login_response['access_token']}"}
+
 
 @pytest.fixture
 def second_user(db, second_registered_user):
-    return (
-        db.query(User)
-        .filter(User.email == second_registered_user["email"])
-        .first()
-    )
+    return db.query(User).filter(User.email == second_registered_user["email"]).first()

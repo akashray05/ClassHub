@@ -1,14 +1,13 @@
-from pathlib import Path
-import uuid
 import shutil
-from fastapi.responses import FileResponse
+import uuid
+from pathlib import Path
 
 from fastapi import UploadFile
+from fastapi.responses import FileResponse
+
+from ..core.constants import ALLOWED_EXTENSIONS, UPLOAD_DIR
 from .base import StorageProvider
-from ..core.constants import (
-    UPLOAD_DIR,
-    ALLOWED_EXTENSIONS,
-)
+
 
 class LocalStorage(StorageProvider):
     def save_file(
@@ -20,15 +19,9 @@ class LocalStorage(StorageProvider):
         extension = Path(file.filename).suffix.lower()
 
         if extension not in ALLOWED_EXTENSIONS:
-            raise ValueError(
-                f"Files of type '{extension}' are not allowed."
-            )
+            raise ValueError(f"Files of type '{extension}' are not allowed.")
 
-        user_folder = (
-            UPLOAD_DIR
-            / f"user_{current_user.id}"
-            / f"folder_{folder_id}"
-        )
+        user_folder = UPLOAD_DIR / f"user_{current_user.id}" / f"folder_{folder_id}"
 
         user_folder.mkdir(
             parents=True,
@@ -48,9 +41,7 @@ class LocalStorage(StorageProvider):
             file_path.stat().st_size,
         )
 
-
-
-    def delete_file(self,file_path: str):
+    def delete_file(self, file_path: str):
         """
         Permanently delete a file from storage.
         """
@@ -59,15 +50,13 @@ class LocalStorage(StorageProvider):
 
         if path.exists():
             path.unlink()
-        
-    def file_exists(self,file_path: str) -> bool:
+
+    def file_exists(self, file_path: str) -> bool:
         """
         Check whether a file exists in storage.
         """
 
         return Path(file_path).exists()
-
-
 
     def get_file_response(
         self,

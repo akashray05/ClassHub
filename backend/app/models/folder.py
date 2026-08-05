@@ -1,7 +1,6 @@
-
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from ..database.base import Base
@@ -33,5 +32,3 @@ class Folder(Base):
         back_populates="folder",
         cascade="all, delete-orphan",
     )
-
-    

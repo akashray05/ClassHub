@@ -1,5 +1,3 @@
-
-
 from fastapi import Depends, HTTPException, status
 
 from .core.auth import get_current_user

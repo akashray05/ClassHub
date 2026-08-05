@@ -5,11 +5,14 @@ interface FileGridProps {
   files: FileItem[];
 
   onDownload?: (file: FileItem) => void;
+
+  onOpen?: (file: FileItem) => void;
 }
 
 export function FileGrid({
   files,
   onDownload,
+  onOpen,
 }: FileGridProps) {
   return (
     <div
@@ -26,6 +29,7 @@ export function FileGrid({
           key={file.id}
           file={file}
           onDownload={onDownload}
+          onOpen={onOpen}
         />
       ))}
     </div>

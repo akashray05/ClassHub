@@ -1,13 +1,7 @@
-from sqlalchemy import (
-    Column,
-    Integer,
-    String,
-    DateTime,
-    Boolean,
-    ForeignKey,
-)
-from sqlalchemy.orm import relationship
 from datetime import datetime
+
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship
 
 from app.database.base import Base
 
@@ -53,4 +47,5 @@ class RefreshToken(Base):
 
     user = relationship(
         "User",
-        back_populates="refresh_tokens",)
+        back_populates="refresh_tokens",
+    )

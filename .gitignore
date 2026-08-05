@@ -1,28 +1,64 @@
+# ===========================
 # Python
+# ===========================
 backend/venv/
+backend/.venv/
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+htmlcov/
 
+# ===========================
 # Node
+# ===========================
 frontend/node_modules/
 frontend/dist/
+frontend/.vite/
 
+# ===========================
 # Environment
+# ===========================
 .env
+.env.*
 backend/.env
 frontend/.env
 
+# ===========================
 # IDE
+# ===========================
 .vscode/
 .idea/
 
-# OS
+# ===========================
+# macOS
+# ===========================
 .DS_Store
-Thumbs.db
 
+# ===========================
 # Logs
+# ===========================
 *.log
+logs/
 
-# Uploads (optional)
+# ===========================
+# Runtime Storage
+# ===========================
 uploads/
+temp/
+cache/
+
+# ===========================
+# Build
+# ===========================
+dist/
+build/
+
+# ===========================
+# Misc
+# ===========================
+*.swp
+*.swo

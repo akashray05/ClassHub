@@ -28,12 +28,11 @@ def test_create_folder_without_token(client):
 
     assert response.status_code == 401
 
+
 def test_create_folder_invalid_token(client):
     response = client.post(
         "/folders/",
-        headers={
-            "Authorization": "Bearer invalid-token"
-        },
+        headers={"Authorization": "Bearer invalid-token"},
         json={
             "name": "Semester 1",
             "description": "Folder",
@@ -41,6 +40,7 @@ def test_create_folder_invalid_token(client):
     )
 
     assert response.status_code == 401
+
 
 def test_create_folder_missing_name(client, auth_headers):
     response = client.post(

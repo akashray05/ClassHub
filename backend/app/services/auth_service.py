@@ -1,15 +1,14 @@
-from datetime import datetime, timedelta, UTC
+from datetime import UTC, datetime, timedelta
+
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from ..core.auth import (
-    create_access_token,
-    create_refresh_token,
-    hash_refresh_token,
-)
+from ..core.auth import (create_access_token, create_refresh_token,
+                         hash_refresh_token)
 from ..core.config import settings
 from ..models.refresh_token import RefreshToken
 from ..models.user import User
+
 
 def refresh_token_service(db: Session, refresh_token: str):
 
@@ -36,9 +35,7 @@ def refresh_token_service(db: Session, refresh_token: str):
             detail="Refresh token expired",
         )
 
-    user = db.query(User).filter(
-        User.id == db_token.user_id
-    ).first()
+    user = db.query(User).filter(User.id == db_token.user_id).first()
 
     if not user:
         raise HTTPException(
@@ -49,9 +46,7 @@ def refresh_token_service(db: Session, refresh_token: str):
     db_token.revoked = True
 
     # Create new access token
-    access_token = create_access_token(
-        {"sub": user.email}
-    )
+    access_token = create_access_token({"sub": user.email})
 
     # Create new refresh token
     new_refresh_token = create_refresh_token()
@@ -76,6 +71,7 @@ def refresh_token_service(db: Session, refresh_token: str):
         "token_type": "bearer",
     }
 
+
 def logout_all_service(db: Session, user: User):
 
     db.query(RefreshToken).filter(
@@ -88,9 +84,7 @@ def logout_all_service(db: Session, user: User):
 
     db.commit()
 
-    return {
-        "message": "Logged out from all devices successfully"
-    }
+    return {"message": "Logged out from all devices successfully"}
 
 
 def logout_service(db: Session, refresh_token: str):
@@ -114,6 +108,4 @@ def logout_service(db: Session, refresh_token: str):
     db_token.revoked = True
     db.commit()
 
-    return {
-        "message": "Logged out successfully"
-    }
+    return {"message": "Logged out successfully"}

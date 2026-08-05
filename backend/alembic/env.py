@@ -1,19 +1,17 @@
+import sys
 from logging.config import fileConfig
+from pathlib import Path
 
-from sqlalchemy import create_engine
-from sqlalchemy import pool
+from sqlalchemy import create_engine, pool
 
 from alembic import context
-
-import sys
-from pathlib import Path
 
 # Add backend directory to Python path
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
-from app.database.base import Base
-from app.core.config import settings
 import app.models
+from app.core.config import settings
+from app.database.base import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -80,6 +78,7 @@ def run_migrations_online() -> None:
 
         with context.begin_transaction():
             context.run_migrations()
+
 
 if context.is_offline_mode():
     run_migrations_offline()

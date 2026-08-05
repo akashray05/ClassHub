@@ -11,7 +11,8 @@ export async function getFolderFiles(folderId: number) {
 
 export async function uploadFile(
   folderId: number,
-  file: File 
+  file: File,
+  onProgress?: (progress: number) => void
 ) {
   const form = new FormData();
 
@@ -23,6 +24,16 @@ export async function uploadFile(
     {
       headers: {
         "Content-Type": "multipart/form-data",
+      },
+
+      onUploadProgress(event) {
+        if (!event.total) return;
+
+        const progress = Math.round(
+          (event.loaded * 100) / event.total
+        );
+
+        onProgress?.(progress);
       },
     }
   );

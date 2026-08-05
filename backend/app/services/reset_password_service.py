@@ -1,4 +1,4 @@
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
@@ -16,11 +16,7 @@ def reset_password_service(
 ):
     token_hash = hash_token(token)
 
-    user = (
-        db.query(User)
-        .filter(User.password_reset_token_hash == token_hash)
-        .first()
-    )
+    user = db.query(User).filter(User.password_reset_token_hash == token_hash).first()
 
     if not user:
         raise HTTPException(
@@ -56,6 +52,4 @@ def reset_password_service(
 
     db.commit()
 
-    return {
-        "message": "Password reset successful. Please log in again."
-    }
+    return {"message": "Password reset successful. Please log in again."}

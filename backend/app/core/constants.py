@@ -46,5 +46,4 @@ ALLOWED_EXTENSIONS = {
     ".ps1",
     ".sql",
     ".db",
-    
 }
