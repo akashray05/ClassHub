@@ -11,21 +11,18 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Header() {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
-  const user =
-    localStorage.getItem("user_name") || "Student";
+  const displayName = user?.name || "Student";
 
-  function logout() {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    localStorage.removeItem("user_name");
-
+  async function handleLogout() {
+    await logout();
     navigate("/login");
   }
-
   return (
     <header className="h-16 border-b border-slate-800 bg-slate-900 px-8 flex items-center justify-between">
 
@@ -65,14 +62,14 @@ export default function Header() {
 
                 <AvatarFallback className="bg-cyan-500 text-black font-bold">
 
-                  {user[0].toUpperCase()}
+                  {displayName[0].toUpperCase()}
 
                 </AvatarFallback>
 
               </Avatar>
 
               <span className="text-white">
-                {user}
+                {displayName}
               </span>
 
             </Button>
@@ -83,7 +80,7 @@ export default function Header() {
             className="bg-slate-900 border-slate-700 text-white"
           >
 
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/settings")}>
 
               <User size={16} />
 
@@ -91,7 +88,7 @@ export default function Header() {
 
             </DropdownMenuItem>
 
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/settings")}>
 
               <Settings size={16} />
 
@@ -100,7 +97,7 @@ export default function Header() {
             </DropdownMenuItem>
 
             <DropdownMenuItem
-              onClick={logout}
+              onClick={handleLogout}
             >
 
               <LogOut size={16} />

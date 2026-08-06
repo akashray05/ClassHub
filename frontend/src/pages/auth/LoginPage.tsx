@@ -1,18 +1,22 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import type { AxiosError } from "axios";
 
 import { loginSchema, type LoginFormData } from "@/schemas/login";
-import { login } from "@/services/auth";
+import { useAuth } from "@/hooks/useAuth";
+import type { MessageResponse } from "@/types/auth";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/toast";
 
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const {
     register,
@@ -24,33 +28,23 @@ export default function LoginPage() {
 
   async function onSubmit(data: LoginFormData) {
     try {
-      const result = await login(
-        data.email,
-        data.password
-      );
-
-      console.log(result);
-
-      localStorage.setItem(
-        "access_token",
-        result.access_token
-      );
-
-      localStorage.setItem(
-        "user_name",
-        data.email
-      );
-
-      localStorage.setItem(
-        "refresh_token",
-        result.refresh_token
-      );
+      await login(data.email, data.password);
 
       navigate("/dashboard");
 
     } catch (err) {
-      console.error(err);
-      alert("Invalid email or password");
+      const axiosErr = err as AxiosError<MessageResponse>;
+
+      const message =
+        axiosErr.response?.data?.detail ??
+        axiosErr.response?.data?.message ??
+        "Invalid email or password";
+
+      toast.add({
+        title: "Login failed",
+        description: message,
+        type: "error",
+      });
     }
   }
 
@@ -98,6 +92,15 @@ export default function LoginPage() {
                   {errors.password.message}
                 </p>
               )}
+
+              <div className="flex justify-end">
+                <Link
+                  to="/forgot-password"
+                  className="text-sm text-cyan-400 hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              </div>
             </div>
 
             <Button
@@ -109,6 +112,13 @@ export default function LoginPage() {
                 ? "Logging in..."
                 : "Login"}
             </Button>
+
+            <p className="text-center text-sm text-slate-400">
+              Don&apos;t have an account?{" "}
+              <Link to="/register" className="text-cyan-400 hover:underline">
+                Sign up
+              </Link>
+            </p>
 
           </form>
         </CardContent>

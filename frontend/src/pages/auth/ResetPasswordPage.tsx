@@ -1,12 +1,15 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, ShieldAlert } from "lucide-react";
 import type { AxiosError } from "axios";
 
-import { registerSchema, type RegisterFormData } from "@/schemas/register";
-import { register as registerUser } from "@/services/auth";
+import {
+  resetPasswordSchema,
+  type ResetPasswordFormData,
+} from "@/schemas/resetPassword";
+import { resetPassword } from "@/services/auth";
 import type { MessageResponse } from "@/types/auth";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -15,8 +18,10 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 
-export default function RegisterPage() {
+export default function ResetPasswordPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -25,22 +30,29 @@ export default function RegisterPage() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<RegisterFormData>({
-    resolver: zodResolver(registerSchema),
+  } = useForm<ResetPasswordFormData>({
+    resolver: zodResolver(resetPasswordSchema),
   });
 
-  async function onSubmit(data: RegisterFormData) {
+  async function onSubmit(data: ResetPasswordFormData) {
+    if (!token) {
+      toast.add({
+        title: "Invalid link",
+        description: "This password reset link is missing a token.",
+        type: "error",
+      });
+      return;
+    }
+
     try {
-      await registerUser({
-        name: data.name,
-        email: data.email,
-        password: data.password,
+      await resetPassword({
+        token,
+        new_password: data.password,
       });
 
       toast.add({
-        title: "Account created",
-        description:
-          "Check your inbox for a verification link before logging in.",
+        title: "Password updated",
+        description: "You can now log in with your new password.",
         type: "success",
       });
 
@@ -51,64 +63,57 @@ export default function RegisterPage() {
       const message =
         axiosErr.response?.data?.detail ??
         axiosErr.response?.data?.message ??
-        "Registration failed. Please try again.";
+        "This link is invalid or has expired.";
 
       toast.add({
-        title: "Registration failed",
+        title: "Reset failed",
         description: message,
         type: "error",
       });
     }
   }
 
+  if (!token) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6">
+        <Card className="w-full max-w-md">
+          <CardHeader className="items-center text-center">
+            <ShieldAlert className="size-10 text-red-500" />
+
+            <CardTitle className="text-2xl mt-4">
+              Invalid reset link
+            </CardTitle>
+
+            <CardDescription>
+              This password reset link is missing or malformed. Please
+              request a new one.
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent>
+            <Button className="w-full" render={<Link to="/forgot-password" />}>
+              Request new link
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-3xl">Create account</CardTitle>
+          <CardTitle className="text-3xl">Reset password</CardTitle>
           <CardDescription>
-            Sign up to start storing and sharing files on ClassHub.
+            Choose a new password for your account.
           </CardDescription>
         </CardHeader>
 
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div className="space-y-2">
-              <Label>Full name</Label>
-
-              <Input
-                type="text"
-                placeholder="John Doe"
-                autoComplete="name"
-                {...register("name")}
-              />
-
-              {errors.name && (
-                <p className="text-sm text-red-500">
-                  {errors.name.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label>Email</Label>
-
-              <Input
-                type="email"
-                placeholder="you@example.com"
-                autoComplete="email"
-                {...register("email")}
-              />
-
-              {errors.email && (
-                <p className="text-sm text-red-500">
-                  {errors.email.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label>Password</Label>
+              <Label>New password</Label>
 
               <div className="relative">
                 <Input
@@ -144,7 +149,7 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Confirm password</Label>
+              <Label>Confirm new password</Label>
 
               <div className="relative">
                 <Input
@@ -182,15 +187,8 @@ export default function RegisterPage() {
             </div>
 
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Creating account..." : "Create account"}
+              {isSubmitting ? "Updating password..." : "Update password"}
             </Button>
-
-            <p className="text-center text-sm text-slate-400">
-              Already have an account?{" "}
-              <Link to="/login" className="text-cyan-400 hover:underline">
-                Sign in
-              </Link>
-            </p>
           </form>
         </CardContent>
       </Card>

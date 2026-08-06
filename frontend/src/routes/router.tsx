@@ -7,6 +7,10 @@ import MainLayout from "../components/layout/MainLayout";
 
 import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
+import VerifyEmailPage from "../pages/auth/VerifyEmailPage";
+import ResendVerificationPage from "../pages/auth/ResendVerificationPage";
+import ForgotPasswordPage from "../pages/auth/ForgotPasswordPage";
+import ResetPasswordPage from "../pages/auth/ResetPasswordPage";
 
 import DashboardPage from "../pages/dashboard/DashboardPage";
 import FileExplorerPage from "../pages/files/FileExplorerPage";
@@ -26,6 +30,22 @@ export const router = createBrowserRouter([
       {
         path: "/register",
         element: <RegisterPage />,
+      },
+      {
+        path: "/verify-email",
+        element: <VerifyEmailPage />,
+      },
+      {
+        path: "/resend-verification",
+        element: <ResendVerificationPage />,
+      },
+      {
+        path: "/forgot-password",
+        element: <ForgotPasswordPage />,
+      },
+      {
+        path: "/reset-password",
+        element: <ResetPasswordPage />,
       },
     ],
   },
