@@ -16,12 +16,12 @@ export function AppCard({
     <div
       className={cn(
         "rounded-2xl",
-        "border border-slate-800",
-        "bg-slate-900",
+        "border border-border",
+        "bg-card text-card-foreground",
         "shadow-sm",
         "transition-all duration-200",
         hover &&
-          "hover:border-cyan-500/50 hover:shadow-lg hover:-translate-y-1",
+          "hover:border-primary/50 hover:shadow-md hover:-translate-y-0.5",
         className
       )}
       {...props}

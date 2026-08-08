@@ -12,11 +12,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
+import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
 
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, refreshUser } = useAuth();
 
   const {
     register,
@@ -25,6 +26,11 @@ export default function LoginPage() {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });
+
+  async function handleGoogleSuccess() {
+    await refreshUser();
+    navigate("/dashboard");
+  }
 
   async function onSubmit(data: LoginFormData) {
     try {
@@ -121,6 +127,23 @@ export default function LoginPage() {
             </p>
 
           </form>
+
+          <div className="my-6 flex items-center gap-3">
+            <div className="h-px flex-1 bg-slate-800" />
+            <span className="text-xs uppercase tracking-wide text-slate-500">
+              or
+            </span>
+            <div className="h-px flex-1 bg-slate-800" />
+          </div>
+
+          <GoogleSignInButton
+            text="signin_with"
+            onSuccess={handleGoogleSuccess}
+          />
+
+          <p className="mt-3 text-center text-xs text-slate-500">
+            Google sign-in requires a genuine @gmail.com account.
+          </p>
         </CardContent>
       </Card>
     </div>

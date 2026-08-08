@@ -110,3 +110,13 @@ export async function refreshAccessToken(): Promise<LoginResponse> {
 
   return response.data;
 }
+
+export async function googleLogin(
+  idToken: string
+): Promise<LoginResponse> {
+  const response = await api.post<LoginResponse>("/auth/google", {
+    id_token: idToken,
+  });
+
+  return response.data;
+}

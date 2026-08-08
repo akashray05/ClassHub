@@ -7,6 +7,7 @@ import {
 } from "@/features/preview";
 
 import { useUpload } from "@/hooks/useUpload";
+import { downloadFile } from "@/services/file";
 import { getDownloadUrl } from "@/services/download";
 
 import {
@@ -14,10 +15,15 @@ import {
   EmptyFiles,
   FileGrid,
   FileToolbar,
+  RenameFileDialog,
+  DeleteFileDialog,
+  MoveFileDialog,
 } from "@/components/files";
+import ShareFileDialog from "@/components/shared/ShareFileDialog";
 
-import { getFolderFiles } from "@/services/file";
+import { getFolderFiles, searchFiles } from "@/services/file";
 import type { FileItem } from "@/types/file";
+import { toast } from "@/components/ui/toast";
 
 export default function FileExplorerPage() {
   const { folderId } = useParams();
@@ -26,6 +32,18 @@ export default function FileExplorerPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [gridView, setGridView] = useState(true);
+
+  const [fileToRename, setFileToRename] = useState<FileItem | null>(null);
+  const [isRenameOpen, setIsRenameOpen] = useState(false);
+
+  const [fileToDelete, setFileToDelete] = useState<FileItem | null>(null);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
+  const [fileToShare, setFileToShare] = useState<FileItem | null>(null);
+  const [isShareOpen, setIsShareOpen] = useState(false);
+
+  const [fileToMove, setFileToMove] = useState<FileItem | null>(null);
+  const [isMoveOpen, setIsMoveOpen] = useState(false);
 
   const {
     selectedFile,
@@ -59,6 +77,80 @@ export default function FileExplorerPage() {
     loadFiles();
   }, [folderId]);
 
+  // Debounced search: falls back to folder listing when cleared.
+  useEffect(() => {
+    if (!folderId) return;
+
+    const trimmed = search.trim();
+
+    if (!trimmed) {
+      loadFiles();
+      return;
+    }
+
+    const timeout = setTimeout(async () => {
+      try {
+        const data = await searchFiles(trimmed);
+        setFiles(data.files);
+      } catch (error) {
+        console.error(error);
+      }
+    }, 350);
+
+    return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, folderId]);
+
+  async function handleDownload(file: FileItem) {
+    try {
+      await downloadFile(file.id, file.original_name);
+    } catch (error) {
+      console.error(error);
+
+      toast.add({
+        title: "Download failed",
+        description: "Could not download this file.",
+        type: "error",
+      });
+    }
+  }
+
+  function openRenameDialog(file: FileItem) {
+    setFileToRename(file);
+    setIsRenameOpen(true);
+  }
+
+  function openDeleteDialog(file: FileItem) {
+    setFileToDelete(file);
+    setIsDeleteOpen(true);
+  }
+
+  function openShareDialog(file: FileItem) {
+    setFileToShare(file);
+    setIsShareOpen(true);
+  }
+
+  function openMoveDialog(file: FileItem) {
+    setFileToMove(file);
+    setIsMoveOpen(true);
+  }
+
+  function handleFileRenamed(updated: FileItem) {
+    setFiles((prev) =>
+      prev.map((file) =>
+        file.id === updated.id ? { ...file, ...updated } : file
+      )
+    );
+  }
+
+  function handleFileDeleted(fileId: number) {
+    setFiles((prev) => prev.filter((file) => file.id !== fileId));
+  }
+
+  function handleFileMoved(fileId: number) {
+    setFiles((prev) => prev.filter((file) => file.id !== fileId));
+  }
+
   if (loading) {
     return (
       <div className="p-10 text-white">
@@ -89,30 +181,19 @@ export default function FileExplorerPage() {
           onToggleView={() =>
             setGridView((v) => !v)
           }
-          onUpload={() => {
-            console.log("Upload button clicked");
-          }}
+          onUpload={() => {}}
         />
 
         <div className="mt-8">
           {files.length === 0 ? (
             <EmptyFiles
-              onUpload={() => {
-                console.log("Upload clicked");
-              }}
+              onUpload={() => {}}
             />
           ) : (
             <FileGrid
               files={files}
-              onDownload={(file) => {
-                console.log("Download", file);
-              }}
+              onDownload={handleDownload}
               onOpen={(file) => {
-                console.log(
-                  "Opening preview",
-                  file,
-                );
-
                 openPreview({
                   id: file.id,
                   original_name:
@@ -123,20 +204,52 @@ export default function FileExplorerPage() {
                     getDownloadUrl(file.id),
                 });
               }}
+              onRename={openRenameDialog}
+              onDelete={openDeleteDialog}
+              onShare={openShareDialog}
+              onMove={openMoveDialog}
             />
           )}
         </div>
       </div>
 
       <PreviewDialog
-  open={isOpen}
-  file={selectedFile}
-  onOpenChange={(open) => {
-    if (!open) {
-      closePreview();
-    }
-  }}
-/>
+        open={isOpen}
+        file={selectedFile}
+        onOpenChange={(open) => {
+          if (!open) {
+            closePreview();
+          }
+        }}
+      />
+
+      <RenameFileDialog
+        file={fileToRename}
+        open={isRenameOpen}
+        onOpenChange={setIsRenameOpen}
+        onRenamed={handleFileRenamed}
+      />
+
+      <DeleteFileDialog
+        file={fileToDelete}
+        open={isDeleteOpen}
+        onOpenChange={setIsDeleteOpen}
+        onDeleted={handleFileDeleted}
+      />
+
+      <ShareFileDialog
+        file={fileToShare}
+        open={isShareOpen}
+        onOpenChange={setIsShareOpen}
+        onShared={() => {}}
+      />
+
+      <MoveFileDialog
+        file={fileToMove}
+        open={isMoveOpen}
+        onOpenChange={setIsMoveOpen}
+        onMoved={handleFileMoved}
+      />
     </>
   );
 }

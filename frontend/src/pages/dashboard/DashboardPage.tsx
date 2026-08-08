@@ -1,32 +1,9 @@
-import { AppButton } from "@/components/app";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import FoldersPage from "./FoldersPage";
-import { getCurrentUser } from "../../services/user";
 import StatsCard from "../../components/common/StatsCard";
+import { useAuth } from "@/hooks/useAuth";
+
 export default function DashboardPage() {
-  const navigate = useNavigate();
-
-  const [user, setUser] = useState<any>(null);
-
-  useEffect(() => {
-    async function loadUser() {
-      try {
-        const data = await getCurrentUser();
-        setUser(data);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
-    loadUser();
-  }, []);
-
-  function logout() {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    navigate("/login");
-  }
+  const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
@@ -82,13 +59,6 @@ export default function DashboardPage() {
           </p>
 
         </div>
-
-        <AppButton
-          className="mt-8"
-          onClick={logout}
-        >
-          Logout
-        </AppButton>
 
       </main>
 

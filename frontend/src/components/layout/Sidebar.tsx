@@ -1,27 +1,34 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard,
   Folder,
   Users,
+  Share2,
   Trash2,
   Settings,
-  HardDrive,
+  ShieldCheck,
+  GraduationCap,
+  LogOut,
 } from "lucide-react";
+
+import { useStorage } from "@/hooks/useStorage";
+import { useAuth } from "@/hooks/useAuth";
+import { formatBytes } from "@/utils";
+import { cn } from "@/lib/utils";
 
 const menuItems = [
   {
-    title: "Dashboard",
-    icon: LayoutDashboard,
-    path: "/dashboard",
-  },
-  {
-    title: "My Files",
+    title: "My folders",
     icon: Folder,
     path: "/dashboard",
   },
   {
-    title: "Shared",
+    title: "Shared with me",
     icon: Users,
+    path: "/shared",
+  },
+  {
+    title: "Shared by me",
+    icon: Share2,
     path: "/shared",
   },
   {
@@ -38,90 +45,114 @@ const menuItems = [
 
 export default function Sidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { data: storage, isLoading: isStorageLoading } = useStorage();
+  const { user, logout } = useAuth();
+
+  const usagePercent = storage
+    ? Math.min(100, Math.round(storage.usage_percent))
+    : 0;
+
+  const items = user?.is_admin
+    ? [
+        ...menuItems,
+        {
+          title: "Admin",
+          icon: ShieldCheck,
+          path: "/admin",
+        },
+      ]
+    : menuItems;
+
+  async function handleLogout() {
+    await logout();
+    navigate("/login");
+  }
 
   return (
-    <aside className="w-72 bg-slate-900 border-r border-slate-800 flex flex-col text-white">
+    <aside className="w-64 shrink-0 bg-sidebar text-sidebar-foreground border-r border-sidebar-border flex flex-col">
 
       {/* Logo */}
-      <div className="p-6 border-b border-slate-800">
+      <div className="flex items-center gap-2.5 px-5 py-5">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+          <GraduationCap size={20} />
+        </div>
 
-        <h1 className="text-3xl font-extrabold text-cyan-400">
-          🚀 ClassHub
-        </h1>
-
-        <p className="text-slate-400 text-sm mt-1">
-          IIT Bombay Media Server
-        </p>
-
+        <span className="text-lg font-semibold tracking-tight">
+          ClassHub
+        </span>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4">
-
-        {menuItems.map((item) => {
+      <nav className="flex-1 px-3 py-2 space-y-0.5">
+        {items.map((item, index) => {
           const Icon = item.icon;
-
-          const active =
-            location.pathname === item.path;
+          const active = location.pathname === item.path;
 
           return (
             <Link
-              key={item.path}
+              key={`${item.path}-${index}`}
               to={item.path}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl mb-2 transition-all duration-200 ${
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors",
                 active
-                  ? "bg-cyan-500 text-black font-semibold shadow-lg"
-                  : "text-slate-300 hover:bg-slate-800 hover:text-white"
-              }`}
+                  ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
+              )}
             >
-              <Icon size={20} />
-
+              <Icon size={18} />
               <span>{item.title}</span>
             </Link>
           );
         })}
-
       </nav>
 
-      {/* Storage Card */}
-
-      <div className="p-4 border-t border-slate-800">
-
-        <div className="rounded-xl bg-slate-800 p-4">
-
-          <div className="flex items-center gap-2 mb-3">
-
-            <HardDrive
-              className="text-cyan-400"
-              size={18}
+      {/* Storage + account */}
+      <div className="border-t border-sidebar-border p-4 space-y-4">
+        <div>
+          <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden">
+            <div
+              className="bg-primary h-full transition-all duration-300"
+              style={{ width: `${usagePercent}%` }}
             />
-
-            <span className="font-medium">
-              Storage
-            </span>
-
           </div>
 
-          <div className="w-full h-3 rounded-full bg-slate-700 overflow-hidden">
-
-            <div className="bg-cyan-400 h-full w-[18%]" />
-
-          </div>
-
-          <div className="mt-2 text-sm text-slate-400">
-
-            1.8 GB of 10 GB used
-
-          </div>
-
+          <p className="mt-2 text-xs text-muted-foreground">
+            {isStorageLoading || !storage
+              ? "Loading storage..."
+              : `${formatBytes(storage.used)} of ${formatBytes(storage.quota)} used`}
+          </p>
         </div>
 
-        <div className="mt-4 text-center text-xs text-slate-500">
-          ClassHub v1.0-dev
-        </div>
+        <div className="flex items-center gap-3 rounded-xl border border-sidebar-border bg-background/60 p-2.5">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary font-semibold uppercase">
+            {(user?.name || "U")[0]}
+          </div>
 
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium text-sidebar-foreground">
+              {user?.name ?? "Loading..."}
+            </p>
+            <p className="truncate text-xs text-muted-foreground">
+              {user?.email}
+            </p>
+            {user?.id !== undefined && (
+              <p className="truncate text-[11px] text-muted-foreground/70">
+                Your ID: {user.id}
+              </p>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            aria-label="Log out"
+            className="shrink-0 rounded-lg p-2 text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+          >
+            <LogOut size={16} />
+          </button>
+        </div>
       </div>
-
     </aside>
   );
 }

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { createFolder } from "../../services/folder";
+import { toast } from "../ui/toast";
 
 type Props = {
   onFolderCreated: () => void;
@@ -12,12 +13,19 @@ export default function CreateFolderDialog({
 }: Props) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleCreate() {
     if (!name.trim()) {
-      alert("Folder name is required");
+      toast.add({
+        title: "Folder name required",
+        description: "Please enter a name for the folder.",
+        type: "error",
+      });
       return;
     }
+
+    setIsSubmitting(true);
 
     try {
       await createFolder(name, description);
@@ -25,11 +33,24 @@ export default function CreateFolderDialog({
       setName("");
       setDescription("");
 
+      toast.add({
+        title: "Folder created",
+        description: `"${name}" was created successfully.`,
+        type: "success",
+      });
+
       onFolderCreated();
 
     } catch (error) {
       console.error(error);
-      alert("Failed to create folder");
+
+      toast.add({
+        title: "Failed to create folder",
+        description: "Something went wrong. Please try again.",
+        type: "error",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -56,8 +77,9 @@ export default function CreateFolderDialog({
       <Button
         className="mt-4"
         onClick={handleCreate}
+        disabled={isSubmitting}
       >
-        + Create Folder
+        {isSubmitting ? "Creating..." : "+ Create Folder"}
       </Button>
 
     </div>

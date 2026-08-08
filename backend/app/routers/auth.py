@@ -11,9 +11,10 @@ from ..database.session import get_db
 from ..dependencies import get_current_user
 from ..models.refresh_token import RefreshToken
 from ..models.user import User
-from ..schemas.user import RefreshTokenRequest, Token
+from ..schemas.user import GoogleLoginRequest, RefreshTokenRequest, Token
 from ..services.auth_service import (logout_all_service, logout_service,
                                      refresh_token_service)
+from ..services.google_auth_service import google_login_service
 
 router = APIRouter(
     prefix="/auth",
@@ -34,6 +35,18 @@ def login(
 
     if not verify_password(form_data.password, db_user.password):
         raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    if not db_user.is_active:
+        raise HTTPException(
+            status_code=403,
+            detail="This account has been deactivated. Contact an administrator.",
+        )
+
+    if not db_user.is_verified:
+        raise HTTPException(
+            status_code=403,
+            detail="Please verify your email before logging in. Check your inbox, or use 'Resend verification email'.",
+        )
 
     access_token = create_access_token({"sub": db_user.email})
 
@@ -73,6 +86,23 @@ def refresh_token(
     return refresh_token_service(
         db=db,
         refresh_token=request.refresh_token,
+    )
+
+
+@router.post("/google", response_model=Token)
+def google_login(
+    request: GoogleLoginRequest,
+    db: Session = Depends(get_db),
+):
+    """
+    Sign in (or sign up) using a verified Google account.
+
+    Only genuine, verified @gmail.com accounts are accepted — see
+    google_auth_service for the verification rules.
+    """
+    return google_login_service(
+        db=db,
+        id_token=request.id_token,
     )
 
 

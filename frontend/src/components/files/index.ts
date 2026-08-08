@@ -4,3 +4,7 @@ export * from "./FileGrid";
 export * from "./EmptyFiles";
 export * from "./FileToolbar";
 export * from "./UploadDropzone";
+export * from "./FileAction";
+export { default as RenameFileDialog } from "./RenameFileDialog";
+export { default as DeleteFileDialog } from "./DeleteFileDialog";
+export { default as MoveFileDialog } from "./MoveFileDialog";

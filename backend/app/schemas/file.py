@@ -26,6 +26,10 @@ class FileRename(BaseModel):
     )
 
 
+class FileMove(BaseModel):
+    folder_id: int
+
+
 class PaginatedFileResponse(BaseModel):
     page: int
     limit: int

@@ -9,9 +9,10 @@ from sqlalchemy.orm import Session
 from ..core.auth import get_current_user
 from ..database.session import get_db
 from ..models.user import User
-from ..schemas.file import (FileRename, FileResponse, PaginatedFileResponse,
-                            SharedByMeResponse, SharedFileResponse, SharedUser,
-                            ShareFileRequest, UpdateSharePermissionRequest)
+from ..schemas.file import (FileMove, FileRename, FileResponse,
+                            PaginatedFileResponse, SharedByMeResponse,
+                            SharedFileResponse, SharedUser, ShareFileRequest,
+                            UpdateSharePermissionRequest)
 from ..services.download_service import download_file_service
 from ..services.listing_service import (get_folder_files_service,
                                         get_trash_files_service,
@@ -24,7 +25,9 @@ from ..services.share_service import (download_shared_file_service,
 from ..services.trash_service import (delete_file_service,
                                       permanently_delete_file_service,
                                       restore_file_service)
-from ..services.upload_service import rename_file_service, upload_file_service
+from ..services.upload_service import (move_file_service,
+                                       rename_file_service,
+                                       upload_file_service)
 
 router = APIRouter(
     prefix="/files",
@@ -143,6 +146,24 @@ def rename_file(
         current_user=current_user,
         file_id=file_id,
         original_name=file_data.original_name,
+    )
+
+
+@router.put(
+    "/{file_id}/move",
+    response_model=FileResponse,
+)
+def move_file(
+    file_id: int,
+    request: FileMove,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return move_file_service(
+        db=db,
+        current_user=current_user,
+        file_id=file_id,
+        target_folder_id=request.folder_id,
     )
 
 

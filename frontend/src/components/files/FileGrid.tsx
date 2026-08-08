@@ -7,12 +7,24 @@ interface FileGridProps {
   onDownload?: (file: FileItem) => void;
 
   onOpen?: (file: FileItem) => void;
+
+  onRename?: (file: FileItem) => void;
+
+  onDelete?: (file: FileItem) => void;
+
+  onShare?: (file: FileItem) => void;
+
+  onMove?: (file: FileItem) => void;
 }
 
 export function FileGrid({
   files,
   onDownload,
   onOpen,
+  onRename,
+  onDelete,
+  onShare,
+  onMove,
 }: FileGridProps) {
   return (
     <div
@@ -30,6 +42,10 @@ export function FileGrid({
           file={file}
           onDownload={onDownload}
           onOpen={onOpen}
+          onRename={onRename}
+          onDelete={onDelete}
+          onShare={onShare}
+          onMove={onMove}
         />
       ))}
     </div>

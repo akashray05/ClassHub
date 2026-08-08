@@ -1,10 +1,37 @@
 import { api } from "./api";
-import type { PaginatedFiles } from "../types/file";
+import type { FileItem, PaginatedFiles } from "../types/file";
 
-export async function getFolderFiles(folderId: number) {
+export async function getFolderFiles(
+  folderId: number,
+  page = 1,
+  limit = 20
+) {
   const response = await api.get<PaginatedFiles>(
-    `/files/folder/${folderId}`
+    `/files/folder/${folderId}`,
+    {
+      params: { page, limit },
+    }
   );
+
+  return response.data;
+}
+
+export async function searchFiles(
+  query: string,
+  page = 1,
+  limit = 20
+) {
+  const response = await api.get<PaginatedFiles>("/files/search", {
+    params: { q: query, page, limit },
+  });
+
+  return response.data;
+}
+
+export async function getTrashFiles(page = 1, limit = 20) {
+  const response = await api.get<PaginatedFiles>("/files/trash", {
+    params: { page, limit },
+  });
 
   return response.data;
 }
@@ -39,4 +66,80 @@ export async function uploadFile(
   );
 
   return response.data;
+}
+
+export async function renameFile(
+  fileId: number,
+  originalName: string
+): Promise<FileItem> {
+  const response = await api.put<FileItem>(`/files/${fileId}`, {
+    original_name: originalName,
+  });
+
+  return response.data;
+}
+
+export async function moveFile(
+  fileId: number,
+  folderId: number
+): Promise<FileItem> {
+  const response = await api.put<FileItem>(`/files/${fileId}/move`, {
+    folder_id: folderId,
+  });
+
+  return response.data;
+}
+
+export async function deleteFile(
+  fileId: number
+): Promise<{ message: string }> {
+  const response = await api.delete<{ message: string }>(
+    `/files/${fileId}`
+  );
+
+  return response.data;
+}
+
+export async function restoreFile(
+  fileId: number
+): Promise<{ message: string }> {
+  const response = await api.put<{ message: string }>(
+    `/files/restore/${fileId}`
+  );
+
+  return response.data;
+}
+
+export async function permanentlyDeleteFile(
+  fileId: number
+): Promise<{ message: string }> {
+  const response = await api.delete<{ message: string }>(
+    `/files/permanent/${fileId}`
+  );
+
+  return response.data;
+}
+
+export async function downloadFile(
+  fileId: number,
+  fileName: string
+): Promise<void> {
+  const response = await api.get(`/files/download/${fileId}`, {
+    responseType: "blob",
+  });
+
+  const blobUrl = window.URL.createObjectURL(
+    new Blob([response.data])
+  );
+
+  const link = document.createElement("a");
+
+  link.href = blobUrl;
+  link.download = fileName;
+
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  window.URL.revokeObjectURL(blobUrl);
 }

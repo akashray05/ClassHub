@@ -18,6 +18,8 @@ import FileExplorerPage from "../pages/files/FileExplorerPage";
 import SharedPage from "../pages/shared/SharedPage";
 import TrashPage from "../pages/trash/TrashPage";
 import SettingsPage from "../pages/settings/SettingsPage";
+import AdminPage from "../pages/admin/AdminPage";
+import AdminRoute from "./AdminRoute";
 
 export const router = createBrowserRouter([
   {
@@ -86,6 +88,15 @@ export const router = createBrowserRouter([
       {
         path: "/settings",
         element: <SettingsPage />,
+      },
+
+      {
+        path: "/admin",
+        element: (
+          <AdminRoute>
+            <AdminPage />
+          </AdminRoute>
+        ),
       },
     ],
   },

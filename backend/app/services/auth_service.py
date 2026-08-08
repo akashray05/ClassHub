@@ -42,6 +42,13 @@ def refresh_token_service(db: Session, refresh_token: str):
             status_code=404,
             detail="User not found",
         )
+
+    if not user.is_active:
+        raise HTTPException(
+            status_code=403,
+            detail="This account has been deactivated.",
+        )
+
     # Revoke the old refresh token
     db_token.revoked = True
 

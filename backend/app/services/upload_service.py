@@ -111,3 +111,54 @@ def rename_file_service(
     db.refresh(db_file)
 
     return db_file
+
+
+def move_file_service(
+    db: Session,
+    current_user,
+    file_id: int,
+    target_folder_id: int,
+):
+    db_file = (
+        db.query(FileModel)
+        .filter(
+            FileModel.id == file_id,
+            FileModel.owner_id == current_user.id,
+            FileModel.is_deleted == False,  # noqa: E712
+        )
+        .first()
+    )
+
+    if db_file is None:
+        raise HTTPException(
+            status_code=404,
+            detail="File not found",
+        )
+
+    target_folder = (
+        db.query(Folder)
+        .filter(
+            Folder.id == target_folder_id,
+            Folder.owner_id == current_user.id,
+        )
+        .first()
+    )
+
+    if target_folder is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Destination folder not found",
+        )
+
+    if db_file.folder_id == target_folder_id:
+        raise HTTPException(
+            status_code=400,
+            detail="File is already in that folder",
+        )
+
+    db_file.folder_id = target_folder_id
+
+    db.commit()
+    db.refresh(db_file)
+
+    return db_file

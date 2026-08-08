@@ -14,9 +14,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
+import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const { refreshUser } = useAuth();
+
+  async function handleGoogleSuccess() {
+    await refreshUser();
+    navigate("/dashboard");
+  }
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -192,6 +200,23 @@ export default function RegisterPage() {
               </Link>
             </p>
           </form>
+
+          <div className="my-6 flex items-center gap-3">
+            <div className="h-px flex-1 bg-slate-800" />
+            <span className="text-xs uppercase tracking-wide text-slate-500">
+              or
+            </span>
+            <div className="h-px flex-1 bg-slate-800" />
+          </div>
+
+          <GoogleSignInButton
+            text="signup_with"
+            onSuccess={handleGoogleSuccess}
+          />
+
+          <p className="mt-3 text-center text-xs text-slate-500">
+            Google sign-up requires a genuine @gmail.com account.
+          </p>
         </CardContent>
       </Card>
     </div>
