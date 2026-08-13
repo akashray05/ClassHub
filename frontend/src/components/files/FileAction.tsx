@@ -43,7 +43,7 @@ export function FileAction({
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
-        className="bg-slate-900 border-slate-700 text-white"
+        className="bg-card border-border text-foreground"
         onClick={(e) => e.stopPropagation()}
       >
         {onOpen && (

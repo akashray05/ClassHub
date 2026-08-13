@@ -8,10 +8,10 @@ interface UploadCardProps {
 function getStatusColor(status: UploadItem["status"]) {
     switch (status) {
         case "queued":
-            return "bg-slate-500";
+            return "bg-muted-foreground";
 
         case "uploading":
-            return "bg-cyan-500";
+            return "bg-primary";
 
         case "success":
             return "bg-green-500";
@@ -23,7 +23,7 @@ function getStatusColor(status: UploadItem["status"]) {
             return "bg-yellow-500";
 
         default:
-            return "bg-slate-500";
+            return "bg-muted-foreground";
     }
 }
 
@@ -58,8 +58,8 @@ export function UploadCard({
             className="
                 rounded-xl
                 border
-                border-slate-700
-                bg-slate-900
+                border-border
+                bg-card
                 p-4
                 shadow-lg
                 transition-all
@@ -69,11 +69,11 @@ export function UploadCard({
 
                 <div className="min-w-0 flex-1">
 
-                    <h3 className="truncate font-semibold text-white">
+                    <h3 className="truncate font-semibold text-foreground">
                         {upload.file.name}
                     </h3>
 
-                    <p className="mt-1 text-sm text-slate-400">
+                    <p className="mt-1 text-sm text-muted-foreground">
                         {(upload.totalBytes / 1024 / 1024).toFixed(2)} MB
                     </p>
 
@@ -88,7 +88,7 @@ export function UploadCard({
                         py-1
                         text-xs
                         font-medium
-                        text-white
+                        text-foreground
                         transition-colors
                         hover:bg-red-700
                     "
@@ -100,7 +100,7 @@ export function UploadCard({
 
             <div className="mt-5">
 
-                <div className="h-2 overflow-hidden rounded-full bg-slate-800">
+                <div className="h-2 overflow-hidden rounded-full bg-muted">
 
                     <div
                         className={`
@@ -118,7 +118,7 @@ export function UploadCard({
 
                 <div className="mt-3 flex items-center justify-between">
 
-                    <span className="text-sm text-slate-300">
+                    <span className="text-sm text-foreground/80">
                         {upload.progress.toFixed(0)}%
                     </span>
 
@@ -129,7 +129,7 @@ export function UploadCard({
                             py-1
                             text-xs
                             font-medium
-                            text-white
+                            text-foreground
                             ${getStatusColor(upload.status)}
                         `}
                     >

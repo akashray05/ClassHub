@@ -15,7 +15,7 @@ export function PDFViewer({
     return (
         <PDFProvider>
 
-            <div className="flex h-full w-full overflow-hidden bg-slate-950">
+            <div className="flex h-full w-full overflow-hidden bg-background">
 
                 <PDFSidebar />
 

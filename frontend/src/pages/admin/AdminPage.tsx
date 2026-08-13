@@ -195,13 +195,13 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 p-10 text-white">
+    <div className="min-h-screen bg-background p-10 text-foreground">
       <div className="flex items-center gap-3 mb-2">
-        <ShieldCheck className="h-8 w-8 text-cyan-400" />
-        <h1 className="text-4xl font-bold text-cyan-400">Admin</h1>
+        <ShieldCheck className="h-8 w-8 text-primary" />
+        <h1 className="text-4xl font-bold text-primary">Admin</h1>
       </div>
 
-      <p className="text-slate-400 mb-8">
+      <p className="text-muted-foreground mb-8">
         Manage users and see how ClassHub is being used across campus.
       </p>
 
@@ -258,11 +258,11 @@ export default function AdminPage() {
       <h2 className="text-2xl font-semibold mb-4">All users</h2>
 
       {loading ? (
-        <p className="text-slate-400">Loading users...</p>
+        <p className="text-muted-foreground">Loading users...</p>
       ) : (
-        <div className="rounded-xl border border-slate-800 overflow-hidden">
+        <div className="rounded-xl border border-border overflow-hidden">
           <table className="w-full text-left">
-            <thead className="bg-slate-900 text-slate-400 text-sm">
+            <thead className="bg-card text-muted-foreground text-sm">
               <tr>
                 <th className="px-4 py-3 font-medium">Name</th>
                 <th className="px-4 py-3 font-medium">Email</th>
@@ -274,19 +274,19 @@ export default function AdminPage() {
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-slate-800 bg-slate-950">
+            <tbody className="divide-y divide-border bg-background">
               {users.map((user) => (
-                <tr key={user.id} className="hover:bg-slate-900/60">
+                <tr key={user.id} className="hover:bg-muted/60">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       {user.name}
                       {currentUser?.id === user.id && (
-                        <span className="text-xs text-slate-500">(you)</span>
+                        <span className="text-xs text-muted-foreground">(you)</span>
                       )}
                     </div>
                   </td>
 
-                  <td className="px-4 py-3 text-slate-400">{user.email}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{user.email}</td>
 
                   <td className="px-4 py-3">
                     <Badge variant={user.is_admin ? "default" : "outline"}>
@@ -302,12 +302,12 @@ export default function AdminPage() {
                     </Badge>
                   </td>
 
-                  <td className="px-4 py-3 text-slate-400 text-sm">
+                  <td className="px-4 py-3 text-muted-foreground text-sm">
                     {formatBytes(user.storage_used)} /{" "}
                     {formatBytes(user.storage_quota)}
                   </td>
 
-                  <td className="px-4 py-3 text-slate-400 text-sm">
+                  <td className="px-4 py-3 text-muted-foreground text-sm">
                     {user.file_count}
                   </td>
 
@@ -323,7 +323,7 @@ export default function AdminPage() {
                         </Button>
                       </DropdownMenuTrigger>
 
-                      <DropdownMenuContent className="bg-slate-900 border-slate-700 text-white">
+                      <DropdownMenuContent className="bg-card border-border text-foreground">
                         <DropdownMenuItem
                           onClick={() => handleToggleStatus(user)}
                         >
@@ -374,7 +374,7 @@ export default function AdminPage() {
             Previous
           </Button>
 
-          <span className="text-sm text-slate-400">
+          <span className="text-sm text-muted-foreground">
             Page {page} of {totalPages}
           </span>
 

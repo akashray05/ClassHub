@@ -20,3 +20,11 @@ export interface PaginatedFiles {
   pages: number;
   files: FileItem[];
 }
+
+export interface DashboardSummary {
+  total_files: number;
+  total_folders: number;
+  trash_count: number;
+  shared_files_count: number;
+  recent_files: FileItem[];
+}

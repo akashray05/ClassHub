@@ -7,13 +7,11 @@ import { loginSchema, type LoginFormData } from "@/schemas/login";
 import { useAuth } from "@/hooks/useAuth";
 import type { MessageResponse } from "@/types/auth";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
-
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -55,97 +53,94 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-3xl">
-            Login
-          </CardTitle>
-        </CardHeader>
+    <div>
+      <h1 className="text-[24px] font-semibold tracking-tight text-neutral-900">
+        Welcome back
+      </h1>
+      <p className="mt-1.5 text-[14.5px] text-neutral-500">
+        Log in to access your files.
+      </p>
 
-        <CardContent>
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="space-y-5"
-          >
-            <div className="space-y-2">
-              <Label>Email</Label>
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
+        <div>
+          <Label htmlFor="email" className="text-[15.5px] text-neutral-700">
+            Email
+          </Label>
 
-              <Input
-                type="email"
-                placeholder="you@example.com"
-                {...register("email")}
-              />
-
-              {errors.email && (
-                <p className="text-sm text-red-500">
-                  {errors.email.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label>Password</Label>
-
-              <Input
-                type="password"
-                placeholder="Password"
-                {...register("password")}
-              />
-
-              {errors.password && (
-                <p className="text-sm text-red-500">
-                  {errors.password.message}
-                </p>
-              )}
-
-              <div className="flex justify-end">
-                <Link
-                  to="/forgot-password"
-                  className="text-sm text-cyan-400 hover:underline"
-                >
-                  Forgot password?
-                </Link>
-              </div>
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isSubmitting}
-            >
-              {isSubmitting
-                ? "Logging in..."
-                : "Login"}
-            </Button>
-
-            <p className="text-center text-sm text-slate-400">
-              Don&apos;t have an account?{" "}
-              <Link to="/register" className="text-cyan-400 hover:underline">
-                Sign up
-              </Link>
-            </p>
-
-          </form>
-
-          <div className="my-6 flex items-center gap-3">
-            <div className="h-px flex-1 bg-slate-800" />
-            <span className="text-xs uppercase tracking-wide text-slate-500">
-              or
-            </span>
-            <div className="h-px flex-1 bg-slate-800" />
-          </div>
-
-          <GoogleSignInButton
-            text="signin_with"
-            onSuccess={handleGoogleSuccess}
+          <Input
+            id="email"
+            type="email"
+            autoComplete="email"
+            placeholder="youremail@gmail.com"
+            className="mt-1.5"
+            {...register("email")}
           />
 
-          <p className="mt-3 text-center text-xs text-slate-500">
-            Google sign-in requires a genuine @gmail.com account.
-          </p>
-        </CardContent>
-      </Card>
+          {errors.email && (
+            <p className="mt-1.5 text-[13.5px] text-destructive">
+              {errors.email.message}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="password" className="text-[15.5px] text-neutral-700">
+              Password
+            </Label>
+
+            <Link
+              to="/forgot-password"
+              className="mb-1.5 text-[14.5px] font-medium text-primary hover:underline"
+            >
+              Forgot password?
+            </Link>
+          </div>
+
+          <Input
+            id="password"
+            type="password"
+            autoComplete="current-password"
+            placeholder="********"
+            className="mt-1.5"
+            {...register("password")}
+          />
+
+          {errors.password && (
+            <p className="mt-1.5 text-[13.5px] text-destructive">
+              {errors.password.message}
+            </p>
+          )}
+        </div>
+
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? "Logging in..." : "Log in"}
+        </Button>
+      </form>
+
+      <p className="mt-6 text-center text-[14.5px] text-neutral-500">
+        Don&apos;t have an account?{" "}
+        <Link to="/register" className="font-medium text-primary hover:underline">
+          Create one
+        </Link>
+      </p>
+
+      <div className="my-6 flex items-center gap-3">
+        <div className="h-px flex-1 bg-neutral-200" />
+        <span className="text-[11px] uppercase tracking-wide text-neutral-400">
+          or
+        </span>
+        <div className="h-px flex-1 bg-neutral-200" />
+      </div>
+
+      <GoogleSignInButton
+        text="signin_with"
+        onSuccess={handleGoogleSuccess}
+      />
+
+      <p className="mt-3 text-center text-[13px] text-neutral-400">
+        Google sign-in requires a genuine @gmail.com account.
+      </p>
     </div>
   );
 }

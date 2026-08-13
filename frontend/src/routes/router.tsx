@@ -20,6 +20,7 @@ import TrashPage from "../pages/trash/TrashPage";
 import SettingsPage from "../pages/settings/SettingsPage";
 import AdminPage from "../pages/admin/AdminPage";
 import AdminRoute from "./AdminRoute";
+import SearchResultsPage from "../pages/search/SearchResultsPage";
 
 export const router = createBrowserRouter([
   {
@@ -78,6 +79,11 @@ export const router = createBrowserRouter([
       {
         path: "/shared",
         element: <SharedPage />,
+      },
+
+      {
+        path: "/search",
+        element: <SearchResultsPage />,
       },
 
       {

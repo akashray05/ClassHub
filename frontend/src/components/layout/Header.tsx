@@ -1,4 +1,7 @@
+import { useState } from "react";
 import { Search, Bell, LogOut, User, Settings } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,43 +13,57 @@ import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function Header() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
+  const [query, setQuery] = useState("");
+
   const displayName = user?.name || "Student";
+
+  function handleSearchSubmit(event: React.FormEvent) {
+    event.preventDefault();
+
+    const trimmed = query.trim();
+
+    if (!trimmed) return;
+
+    navigate(`/search?q=${encodeURIComponent(trimmed)}`);
+  }
 
   async function handleLogout() {
     await logout();
     navigate("/login");
   }
+
   return (
-    <header className="h-16 border-b border-slate-800 bg-slate-900 px-8 flex items-center justify-between">
+    <header className="h-16 border-b border-border bg-card px-8 flex items-center justify-between">
 
       {/* Search */}
 
-      <div className="relative w-[420px]">
+      <form onSubmit={handleSearchSubmit} className="relative w-[420px]">
 
         <Search
           size={18}
-          className="absolute left-3 top-3 text-slate-400"
+          className="absolute left-3 top-2 text-muted-foreground"
         />
 
         <Input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
           placeholder="Search files..."
-          className="pl-10 bg-slate-800 border-slate-700 text-white"
+          className="pl-10 bg-muted border-border text-foreground"
         />
 
-      </div>
+      </form>
 
       <div className="flex items-center gap-5">
 
         <Bell
           size={20}
-          className="text-slate-400"
+          className="text-muted-foreground"
         />
 
         <DropdownMenu>
@@ -60,7 +77,7 @@ export default function Header() {
 
               <Avatar>
 
-                <AvatarFallback className="bg-cyan-500 text-black font-bold">
+                <AvatarFallback className="bg-primary text-primary-foreground font-bold">
 
                   {displayName[0].toUpperCase()}
 
@@ -68,7 +85,7 @@ export default function Header() {
 
               </Avatar>
 
-              <span className="text-white">
+              <span className="text-foreground">
                 {displayName}
               </span>
 
@@ -77,7 +94,7 @@ export default function Header() {
           </DropdownMenuTrigger>
 
           <DropdownMenuContent
-            className="bg-slate-900 border-slate-700 text-white"
+            className="bg-card border-border text-foreground"
           >
 
             <DropdownMenuItem onClick={() => navigate("/settings")}>

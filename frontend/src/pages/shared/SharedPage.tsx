@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Users, Download, Ban, Check, X } from "lucide-react";
 import type { AxiosError } from "axios";
 
@@ -20,7 +21,17 @@ import { formatBytes } from "@/utils";
 type TabKey = "with-me" | "by-me";
 
 export default function SharedPage() {
-  const [tab, setTab] = useState<TabKey>("with-me");
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const initialTab: TabKey =
+    searchParams.get("tab") === "by-me" ? "by-me" : "with-me";
+
+  const [tab, setTab] = useState<TabKey>(initialTab);
+
+  function selectTab(next: TabKey) {
+    setTab(next);
+    setSearchParams({ tab: next }, { replace: true });
+  }
 
   const [sharedWithMe, setSharedWithMe] = useState<SharedWithMeItem[]>([]);
   const [sharedByMe, setSharedByMe] = useState<SharedByMeItem[]>([]);
@@ -152,41 +163,41 @@ export default function SharedPage() {
 
   if (loading) {
     return (
-      <div className="p-10 text-white">
+      <div className="p-10 text-foreground">
         Loading...
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 p-10 text-white">
+    <div className="min-h-screen bg-background p-10 text-foreground">
       <div className="flex items-center gap-3 mb-2">
-        <Users className="h-8 w-8 text-cyan-400" />
-        <h1 className="text-4xl font-bold text-cyan-400">Shared</h1>
+        <Users className="h-8 w-8 text-primary" />
+        <h1 className="text-4xl font-bold text-primary">Shared</h1>
       </div>
 
-      <p className="text-slate-400 mb-8">
+      <p className="text-muted-foreground mb-8">
         Files other people have shared with you, and files you've shared.
       </p>
 
       <div className="flex gap-2 mb-8">
         <button
-          onClick={() => setTab("with-me")}
+          onClick={() => selectTab("with-me")}
           className={`px-4 py-2 rounded-xl text-sm font-medium transition ${
             tab === "with-me"
-              ? "bg-cyan-500 text-black"
-              : "bg-slate-900 text-slate-300 hover:bg-slate-800"
+              ? "bg-primary text-primary-foreground"
+              : "bg-card text-foreground/80 hover:bg-muted"
           }`}
         >
           Shared with me ({sharedWithMe.length})
         </button>
 
         <button
-          onClick={() => setTab("by-me")}
+          onClick={() => selectTab("by-me")}
           className={`px-4 py-2 rounded-xl text-sm font-medium transition ${
             tab === "by-me"
-              ? "bg-cyan-500 text-black"
-              : "bg-slate-900 text-slate-300 hover:bg-slate-800"
+              ? "bg-primary text-primary-foreground"
+              : "bg-card text-foreground/80 hover:bg-muted"
           }`}
         >
           Shared by me ({sharedByMe.length})
@@ -196,13 +207,13 @@ export default function SharedPage() {
       {tab === "with-me" && (
         sharedWithMe.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24">
-            <Users className="h-20 w-20 text-slate-600" />
+            <Users className="h-20 w-20 text-muted-foreground/60" />
 
-            <h2 className="mt-6 text-2xl font-semibold text-white">
+            <h2 className="mt-6 text-2xl font-semibold text-foreground">
               Nothing shared with you yet
             </h2>
 
-            <p className="mt-2 text-slate-400 text-center max-w-md">
+            <p className="mt-2 text-muted-foreground text-center max-w-md">
               When classmates share files with you, they'll show up here.
             </p>
           </div>
@@ -212,11 +223,11 @@ export default function SharedPage() {
               <AppCard key={item.file_id} className="p-5">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <h3 className="font-semibold text-white truncate">
+                    <h3 className="font-semibold text-foreground truncate">
                       {item.original_name}
                     </h3>
 
-                    <p className="text-sm text-slate-400">
+                    <p className="text-sm text-muted-foreground">
                       {formatBytes(item.file_size)}
                     </p>
                   </div>
@@ -226,11 +237,11 @@ export default function SharedPage() {
                   </Badge>
                 </div>
 
-                <p className="mt-3 text-sm text-slate-400">
+                <p className="mt-3 text-sm text-muted-foreground">
                   Shared by{" "}
-                  <span className="text-slate-200">{item.owner_name}</span>
+                  <span className="text-foreground">{item.owner_name}</span>
                   <br />
-                  <span className="text-slate-500">{item.owner_email}</span>
+                  <span className="text-muted-foreground">{item.owner_email}</span>
                 </p>
 
                 <AppButton
@@ -255,13 +266,13 @@ export default function SharedPage() {
       {tab === "by-me" && (
         sharedByMe.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24">
-            <Users className="h-20 w-20 text-slate-600" />
+            <Users className="h-20 w-20 text-muted-foreground/100" />
 
-            <h2 className="mt-6 text-2xl font-semibold text-white">
+            <h2 className="mt-6 text-2xl font-semibold text-foreground">
               You haven't shared anything yet
             </h2>
 
-            <p className="mt-2 text-slate-400 text-center max-w-md">
+            <p className="mt-2 text-muted-foreground text-center max-w-md">
               Share a file from any folder to see it listed here along with
               who has access.
             </p>
@@ -270,7 +281,7 @@ export default function SharedPage() {
           <div className="space-y-4">
             {sharedByMe.map((item) => (
               <AppCard key={item.file_id} className="p-5">
-                <h3 className="font-semibold text-white mb-3">
+                <h3 className="font-semibold text-foreground mb-3">
                   {item.original_name}
                 </h3>
 
@@ -281,13 +292,13 @@ export default function SharedPage() {
                     return (
                       <div
                         key={key}
-                        className="flex items-center justify-between rounded-xl bg-slate-800/60 px-4 py-3"
+                        className="flex items-center justify-between rounded-xl bg-muted/60 px-4 py-3"
                       >
                         <div className="min-w-0">
-                          <p className="text-sm font-medium text-white truncate">
+                          <p className="text-sm font-medium text-foreground truncate">
                             {user.name}
                           </p>
-                          <p className="text-xs text-slate-400 truncate">
+                          <p className="text-xs text-muted-foreground truncate">
                             {user.email}
                           </p>
                         </div>

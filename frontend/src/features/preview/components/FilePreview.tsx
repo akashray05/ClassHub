@@ -30,7 +30,7 @@ export function FilePreview({
     text: <TextPreview file={file} />,
 
     unknown: (
-      <div className="flex h-full items-center justify-center text-slate-400">
+      <div className="flex h-full items-center justify-center text-muted-foreground">
         Preview not available.
       </div>
     ),

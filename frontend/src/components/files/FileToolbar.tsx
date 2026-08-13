@@ -1,6 +1,13 @@
-import { Search, Upload, Grid3X3, List } from "lucide-react";
+import { Search, Upload, Grid3X3, List, ArrowUpDown, Check } from "lucide-react";
 
 import { AppButton } from "@/components/app";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import type { SortBy, SortOrder } from "@/services/file";
 
 interface FileToolbarProps {
   search: string;
@@ -12,7 +19,22 @@ interface FileToolbarProps {
   onToggleView: () => void;
 
   onUpload: () => void;
+
+  sortBy?: SortBy;
+
+  sortOrder?: SortOrder;
+
+  onSortChange?: (sortBy: SortBy, sortOrder: SortOrder) => void;
 }
+
+const SORT_OPTIONS: { label: string; sortBy: SortBy; sortOrder: SortOrder }[] = [
+  { label: "Newest first", sortBy: "date", sortOrder: "desc" },
+  { label: "Oldest first", sortBy: "date", sortOrder: "asc" },
+  { label: "Name (A–Z)", sortBy: "name", sortOrder: "asc" },
+  { label: "Name (Z–A)", sortBy: "name", sortOrder: "desc" },
+  { label: "Largest first", sortBy: "size", sortOrder: "desc" },
+  { label: "Smallest first", sortBy: "size", sortOrder: "asc" },
+];
 
 export function FileToolbar({
   search,
@@ -20,6 +42,9 @@ export function FileToolbar({
   gridView,
   onToggleView,
   onUpload,
+  sortBy = "date",
+  sortOrder = "desc",
+  onSortChange,
 }: FileToolbarProps) {
   return (
     <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -29,7 +54,7 @@ export function FileToolbar({
       <div className="relative w-full md:max-w-md">
 
         <Search
-          className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500"
+          className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
         />
 
         <input
@@ -42,14 +67,14 @@ export function FileToolbar({
             w-full
             rounded-xl
             border
-            border-slate-700
-            bg-slate-900
+            border-border
+            bg-card
             py-2
             pl-10
             pr-4
-            text-white
+            text-foreground
             outline-none
-            focus:border-cyan-500
+            focus:border-primary
           "
         />
 
@@ -58,6 +83,35 @@ export function FileToolbar({
       {/* Actions */}
 
       <div className="flex gap-2">
+
+        {onSortChange && (
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <AppButton variant="outline">
+                <ArrowUpDown className="h-4 w-4" />
+              </AppButton>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent className="bg-card border-border text-foreground">
+              {SORT_OPTIONS.map((option) => {
+                const active =
+                  option.sortBy === sortBy && option.sortOrder === sortOrder;
+
+                return (
+                  <DropdownMenuItem
+                    key={option.label}
+                    onClick={() =>
+                      onSortChange(option.sortBy, option.sortOrder)
+                    }
+                  >
+                    <span className="flex-1">{option.label}</span>
+                    {active && <Check className="h-4 w-4" />}
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
 
         <AppButton
           variant="outline"

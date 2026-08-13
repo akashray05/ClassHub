@@ -1,12 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { UploadQueue } from "@/features/upload";
+import { UploadQueue, useUploadManager } from "@/features/upload";
 import {
   PreviewDialog,
   usePreview,
 } from "@/features/preview";
 
-import { useUpload } from "@/hooks/useUpload";
 import { downloadFile } from "@/services/file";
 import { getDownloadUrl } from "@/services/download";
 
@@ -22,8 +21,10 @@ import {
 import ShareFileDialog from "@/components/shared/ShareFileDialog";
 
 import { getFolderFiles, searchFiles } from "@/services/file";
+import type { SortBy, SortOrder } from "@/services/file";
 import type { FileItem } from "@/types/file";
 import { toast } from "@/components/ui/toast";
+import { Button } from "@/components/ui/button";
 
 export default function FileExplorerPage() {
   const { folderId } = useParams();
@@ -32,6 +33,30 @@ export default function FileExplorerPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [gridView, setGridView] = useState(true);
+
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalFiles, setTotalFiles] = useState(0);
+  const PAGE_SIZE = 20;
+
+  const [sortBy, setSortBy] = useState<SortBy>("date");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
+
+  const secondaryFileInputRef = useRef<HTMLInputElement>(null);
+
+  function openSecondaryFilePicker() {
+    secondaryFileInputRef.current?.click();
+  }
+
+  function handleSecondaryFileChange(
+    event: React.ChangeEvent<HTMLInputElement>
+  ) {
+    if (!event.target.files || event.target.files.length === 0) return;
+
+    addFiles(Array.from(event.target.files));
+
+    event.target.value = "";
+  }
 
   const [fileToRename, setFileToRename] = useState<FileItem | null>(null);
   const [isRenameOpen, setIsRenameOpen] = useState(false);
@@ -52,12 +77,20 @@ export default function FileExplorerPage() {
     closePreview,
   } = usePreview();
 
-  async function loadFiles() {
+  async function loadFiles(targetPage = page) {
     if (!folderId) return;
 
     try {
-      const data = await getFolderFiles(Number(folderId));
+      const data = await getFolderFiles(
+        Number(folderId),
+        targetPage,
+        PAGE_SIZE,
+        sortBy,
+        sortOrder
+      );
       setFiles(data.files);
+      setTotalPages(data.pages || 1);
+      setTotalFiles(data.total ?? data.files.length);
     } catch (error) {
       console.error(error);
     } finally {
@@ -66,32 +99,45 @@ export default function FileExplorerPage() {
   }
 
   const {
-    upload,
     uploads,
-  } = useUpload({
+    addFiles,
+    removeUpload,
+  } = useUploadManager({
     folderId: Number(folderId),
-    onSuccess: loadFiles,
+    onSuccess: () => loadFiles(page),
   });
 
+  // Reset to page 1 whenever the folder changes.
   useEffect(() => {
-    loadFiles();
+    setPage(1);
   }, [folderId]);
 
-  // Debounced search: falls back to folder listing when cleared.
+  // Load the current folder page whenever the folder, page, or sort
+  // changes, but only while not actively searching (the search effect
+  // below takes over in that case).
+  useEffect(() => {
+    if (!folderId) return;
+    if (search.trim()) return;
+
+    loadFiles(page);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [folderId, page, search, sortBy, sortOrder]);
+
+  // Debounced search: resets to page 1 on every new search term.
   useEffect(() => {
     if (!folderId) return;
 
     const trimmed = search.trim();
 
-    if (!trimmed) {
-      loadFiles();
-      return;
-    }
+    if (!trimmed) return;
 
     const timeout = setTimeout(async () => {
       try {
-        const data = await searchFiles(trimmed);
+        const data = await searchFiles(trimmed, 1, PAGE_SIZE, sortBy, sortOrder);
         setFiles(data.files);
+        setTotalPages(data.pages || 1);
+        setTotalFiles(data.total ?? data.files.length);
+        setPage(1);
       } catch (error) {
         console.error(error);
       }
@@ -99,7 +145,40 @@ export default function FileExplorerPage() {
 
     return () => clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, folderId]);
+  }, [search, folderId, sortBy, sortOrder]);
+
+  function handleSortChange(nextSortBy: SortBy, nextSortOrder: SortOrder) {
+    setSortBy(nextSortBy);
+    setSortOrder(nextSortOrder);
+    setPage(1);
+  }
+
+  async function goToPage(nextPage: number) {
+    if (nextPage < 1 || nextPage > totalPages) return;
+
+    const trimmed = search.trim();
+
+    if (trimmed) {
+      setPage(nextPage);
+
+      try {
+        const data = await searchFiles(
+          trimmed,
+          nextPage,
+          PAGE_SIZE,
+          sortBy,
+          sortOrder
+        );
+        setFiles(data.files);
+        setTotalPages(data.pages || 1);
+        setTotalFiles(data.total ?? data.files.length);
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      setPage(nextPage);
+    }
+  }
 
   async function handleDownload(file: FileItem) {
     try {
@@ -144,16 +223,28 @@ export default function FileExplorerPage() {
   }
 
   function handleFileDeleted(fileId: number) {
-    setFiles((prev) => prev.filter((file) => file.id !== fileId));
+    const remaining = files.filter((file) => file.id !== fileId);
+
+    if (remaining.length === 0 && page > 1) {
+      goToPage(page - 1);
+    } else {
+      loadFiles(page);
+    }
   }
 
   function handleFileMoved(fileId: number) {
-    setFiles((prev) => prev.filter((file) => file.id !== fileId));
+    const remaining = files.filter((file) => file.id !== fileId);
+
+    if (remaining.length === 0 && page > 1) {
+      goToPage(page - 1);
+    } else {
+      loadFiles(page);
+    }
   }
 
   if (loading) {
     return (
-      <div className="p-10 text-white">
+      <div className="p-10 text-foreground">
         Loading...
       </div>
     );
@@ -161,17 +252,17 @@ export default function FileExplorerPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-slate-950 p-10 text-white">
-        <h1 className="mb-8 text-4xl font-bold text-cyan-400">
+      <div className="min-h-screen bg-background p-10 text-foreground">
+        <h1 className="mb-8 text-4xl font-bold text-primary">
           Folder #{folderId}
         </h1>
 
         <UploadDropzone
-          onFilesSelected={upload}
+          onFilesSelected={(fileList) => addFiles(Array.from(fileList))}
         />
         <UploadQueue
            uploads={uploads}
-           onRemove={() => {}}
+           onRemove={removeUpload}
         />
 
         <FileToolbar
@@ -181,13 +272,24 @@ export default function FileExplorerPage() {
           onToggleView={() =>
             setGridView((v) => !v)
           }
-          onUpload={() => {}}
+          onUpload={openSecondaryFilePicker}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
+          onSortChange={handleSortChange}
+        />
+
+        <input
+          ref={secondaryFileInputRef}
+          type="file"
+          multiple
+          hidden
+          onChange={handleSecondaryFileChange}
         />
 
         <div className="mt-8">
           {files.length === 0 ? (
             <EmptyFiles
-              onUpload={() => {}}
+              onUpload={openSecondaryFilePicker}
             />
           ) : (
             <FileGrid
@@ -211,6 +313,31 @@ export default function FileExplorerPage() {
             />
           )}
         </div>
+
+        {files.length > 0 && totalPages > 1 && (
+          <div className="mt-8 flex items-center justify-center gap-4">
+            <Button
+              variant="outline"
+              disabled={page <= 1}
+              onClick={() => goToPage(page - 1)}
+            >
+              Previous
+            </Button>
+
+            <span className="text-sm text-muted-foreground">
+              Page {page} of {totalPages}
+              {totalFiles > 0 && ` · ${totalFiles} files`}
+            </span>
+
+            <Button
+              variant="outline"
+              disabled={page >= totalPages}
+              onClick={() => goToPage(page + 1)}
+            >
+              Next
+            </Button>
+          </div>
+        )}
       </div>
 
       <PreviewDialog

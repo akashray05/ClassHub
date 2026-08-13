@@ -127,7 +127,7 @@ export default function GoogleSignInButton({
 
   if (!GOOGLE_CLIENT_ID) {
     return (
-      <p className="text-xs text-slate-500 text-center">
+      <p className="text-xs text-muted-foreground text-center">
         Google sign-in isn&apos;t configured yet.
       </p>
     );
@@ -137,7 +137,7 @@ export default function GoogleSignInButton({
     <div className="flex flex-col items-center gap-2">
       <div ref={containerRef} />
       {isProcessing && (
-        <p className="text-xs text-slate-400">Signing you in...</p>
+        <p className="text-xs text-muted-foreground">Signing you in...</p>
       )}
     </div>
   );

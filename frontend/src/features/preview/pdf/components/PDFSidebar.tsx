@@ -11,9 +11,9 @@ export function PDFSidebar() {
     }
 
     return (
-        <div className="w-64 overflow-y-auto border-r border-slate-800 bg-slate-950">
+        <div className="w-64 overflow-y-auto border-r border-border bg-background">
 
-            <div className="p-4 text-sm text-slate-400">
+            <div className="p-4 text-sm text-muted-foreground">
                 Thumbnails
             </div>
 
@@ -24,7 +24,7 @@ export function PDFSidebar() {
                 (_, index) => (
                     <div
                         key={index}
-                        className="m-3 flex h-28 items-center justify-center rounded border border-slate-700 hover:border-cyan-500"
+                        className="m-3 flex h-28 items-center justify-center rounded border border-border hover:border-primary"
                     >
                         {index + 1}
                     </div>

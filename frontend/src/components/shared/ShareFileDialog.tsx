@@ -119,17 +119,17 @@ export default function ShareFileDialog({
               }}
             />
 
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted-foreground">
               They must already have a ClassHub account with this email.
             </p>
           </div>
 
-          <label className="flex items-center gap-2 text-sm text-slate-300">
+          <label className="flex items-center gap-2 text-sm text-foreground/80">
             <input
               type="checkbox"
               checked={canDownload}
               onChange={(e) => setCanDownload(e.target.checked)}
-              className="h-4 w-4 rounded border-slate-600 bg-slate-800 accent-cyan-500"
+              className="h-4 w-4 rounded border-border bg-muted accent-primary"
             />
             Allow this user to download the file
           </label>

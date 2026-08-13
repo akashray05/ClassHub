@@ -12,7 +12,6 @@ import {
 import { resetPassword } from "@/services/auth";
 import type { MessageResponse } from "@/types/auth";
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -75,123 +74,123 @@ export default function ResetPasswordPage() {
 
   if (!token) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6">
-        <Card className="w-full max-w-md">
-          <CardHeader className="items-center text-center">
-            <ShieldAlert className="size-10 text-red-500" />
+      <div className="text-center">
+        <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-destructive/10">
+          <ShieldAlert className="size-6 text-destructive" />
+        </div>
 
-            <CardTitle className="text-2xl mt-4">
-              Invalid reset link
-            </CardTitle>
+        <h1 className="mt-4 text-[22px] font-semibold tracking-tight text-neutral-900">
+          Invalid reset link
+        </h1>
 
-            <CardDescription>
-              This password reset link is missing or malformed. Please
-              request a new one.
-            </CardDescription>
-          </CardHeader>
+        <p className="mt-1.5 text-[13.5px] text-neutral-500">
+          This password reset link is missing or malformed. Please request a
+          new one.
+        </p>
 
-          <CardContent>
-            <Button className="w-full" render={<Link to="/forgot-password" />}>
-              Request new link
-            </Button>
-          </CardContent>
-        </Card>
+        <Button
+          className="mt-6 w-full"
+          render={<Link to="/forgot-password" />}
+        >
+          Request new link
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-3xl">Reset password</CardTitle>
-          <CardDescription>
-            Choose a new password for your account.
-          </CardDescription>
-        </CardHeader>
+    <div>
+      <h1 className="text-[22px] font-semibold tracking-tight text-neutral-900">
+        Reset password
+      </h1>
+      <p className="mt-1.5 text-[13.5px] text-neutral-500">
+        Choose a new password for your account.
+      </p>
 
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            <div className="space-y-2">
-              <Label>New password</Label>
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
+        <div>
+          <Label htmlFor="password" className="text-[13px] text-neutral-700">
+            New password
+          </Label>
 
-              <div className="relative">
-                <Input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Password"
-                  autoComplete="new-password"
-                  className="pr-9"
-                  {...register("password")}
-                />
+          <div className="relative mt-1.5">
+            <Input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="••••••••"
+              autoComplete="new-password"
+              className="pr-9"
+              {...register("password")}
+            />
 
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400 hover:text-slate-200"
-                  tabIndex={-1}
-                  aria-label={
-                    showPassword ? "Hide password" : "Show password"
-                  }
-                >
-                  {showPassword ? (
-                    <EyeOff className="size-4" />
-                  ) : (
-                    <Eye className="size-4" />
-                  )}
-                </button>
-              </div>
-
-              {errors.password && (
-                <p className="text-sm text-red-500">
-                  {errors.password.message}
-                </p>
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-neutral-400 hover:text-neutral-600"
+              tabIndex={-1}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? (
+                <EyeOff className="size-4" />
+              ) : (
+                <Eye className="size-4" />
               )}
-            </div>
+            </button>
+          </div>
 
-            <div className="space-y-2">
-              <Label>Confirm new password</Label>
+          {errors.password && (
+            <p className="mt-1.5 text-[12.5px] text-destructive">
+              {errors.password.message}
+            </p>
+          )}
+        </div>
 
-              <div className="relative">
-                <Input
-                  type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Re-enter password"
-                  autoComplete="new-password"
-                  className="pr-9"
-                  {...register("confirmPassword")}
-                />
+        <div>
+          <Label
+            htmlFor="confirmPassword"
+            className="text-[13px] text-neutral-700"
+          >
+            Confirm new password
+          </Label>
 
-                <button
-                  type="button"
-                  onClick={() =>
-                    setShowConfirmPassword((prev) => !prev)
-                  }
-                  className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400 hover:text-slate-200"
-                  tabIndex={-1}
-                  aria-label={
-                    showConfirmPassword ? "Hide password" : "Show password"
-                  }
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className="size-4" />
-                  ) : (
-                    <Eye className="size-4" />
-                  )}
-                </button>
-              </div>
+          <div className="relative mt-1.5">
+            <Input
+              id="confirmPassword"
+              type={showConfirmPassword ? "text" : "password"}
+              placeholder="••••••••"
+              autoComplete="new-password"
+              className="pr-9"
+              {...register("confirmPassword")}
+            />
 
-              {errors.confirmPassword && (
-                <p className="text-sm text-red-500">
-                  {errors.confirmPassword.message}
-                </p>
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword((prev) => !prev)}
+              className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-neutral-400 hover:text-neutral-600"
+              tabIndex={-1}
+              aria-label={
+                showConfirmPassword ? "Hide password" : "Show password"
+              }
+            >
+              {showConfirmPassword ? (
+                <EyeOff className="size-4" />
+              ) : (
+                <Eye className="size-4" />
               )}
-            </div>
+            </button>
+          </div>
 
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Updating password..." : "Update password"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+          {errors.confirmPassword && (
+            <p className="mt-1.5 text-[12.5px] text-destructive">
+              {errors.confirmPassword.message}
+            </p>
+          )}
+        </div>
+
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? "Updating password..." : "Update password"}
+        </Button>
+      </form>
     </div>
   );
 }

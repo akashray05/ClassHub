@@ -13,14 +13,14 @@ export function EmptyFiles({
     <div className="flex flex-col items-center justify-center py-24">
 
       <FolderOpen
-        className="h-20 w-20 text-slate-600"
+        className="h-20 w-20 text-muted-foreground/60"
       />
 
-      <h2 className="mt-6 text-2xl font-semibold text-white">
+      <h2 className="mt-6 text-2xl font-semibold text-foreground">
         This folder is empty
       </h2>
 
-      <p className="mt-2 text-slate-400 text-center max-w-md">
+      <p className="mt-2 text-muted-foreground text-center max-w-md">
         Upload notes, assignments,
         PDFs or any learning material to
         start organizing this folder.

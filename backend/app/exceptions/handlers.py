@@ -4,6 +4,8 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
+from ..core.logger import logger
+
 
 def register_exception_handlers(app: FastAPI):
     """
@@ -46,6 +48,15 @@ def register_exception_handlers(app: FastAPI):
         request: Request,
         exc: Exception,
     ):
+        # This used to swallow every unhandled exception silently —
+        # no console output, nothing in logs/classhub.log. Now it's
+        # logged with a full traceback before the generic 500 goes
+        # back to the client, so future crashes are actually visible.
+        logger.error(
+            f"Unhandled exception on {request.method} {request.url.path}",
+            exc_info=exc,
+        )
+
         return JSONResponse(
             status_code=500,
             content={

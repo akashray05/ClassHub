@@ -37,11 +37,11 @@ export function PreviewDialog({
     flex-1
     rounded-lg
     border
-    border-slate-800
-    bg-slate-950">
+    border-border
+    bg-background">
 
-        <DialogHeader className="border-b border-slate-800 px-6 py-4 shrink-0">
-          <DialogTitle className="text-white">
+        <DialogHeader className="border-b border-border px-6 py-4 shrink-0">
+          <DialogTitle className="text-foreground">
             {file.original_name}
           </DialogTitle>
         </DialogHeader>

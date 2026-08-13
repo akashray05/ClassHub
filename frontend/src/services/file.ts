@@ -1,15 +1,25 @@
 import { api } from "./api";
-import type { FileItem, PaginatedFiles } from "../types/file";
+import type { FileItem, PaginatedFiles, DashboardSummary } from "../types/file";
+
+export type SortBy = "name" | "date" | "size";
+export type SortOrder = "asc" | "desc";
 
 export async function getFolderFiles(
   folderId: number,
   page = 1,
-  limit = 20
+  limit = 20,
+  sortBy: SortBy = "date",
+  sortOrder: SortOrder = "desc"
 ) {
   const response = await api.get<PaginatedFiles>(
     `/files/folder/${folderId}`,
     {
-      params: { page, limit },
+      params: {
+        page,
+        limit,
+        sort_by: sortBy,
+        sort_order: sortOrder,
+      },
     }
   );
 
@@ -19,10 +29,18 @@ export async function getFolderFiles(
 export async function searchFiles(
   query: string,
   page = 1,
-  limit = 20
+  limit = 20,
+  sortBy: SortBy = "date",
+  sortOrder: SortOrder = "desc"
 ) {
   const response = await api.get<PaginatedFiles>("/files/search", {
-    params: { q: query, page, limit },
+    params: {
+      q: query,
+      page,
+      limit,
+      sort_by: sortBy,
+      sort_order: sortOrder,
+    },
   });
 
   return response.data;
@@ -142,4 +160,12 @@ export async function downloadFile(
   link.remove();
 
   window.URL.revokeObjectURL(blobUrl);
+}
+
+export async function getDashboardSummary(): Promise<DashboardSummary> {
+  const response = await api.get<DashboardSummary>(
+    "/files/dashboard-summary"
+  );
+
+  return response.data;
 }

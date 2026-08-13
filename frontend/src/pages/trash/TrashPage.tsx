@@ -116,32 +116,32 @@ export default function TrashPage() {
 
   if (loading) {
     return (
-      <div className="p-10 text-white">
+      <div className="p-10 text-foreground">
         Loading...
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 p-10 text-white">
+    <div className="min-h-screen bg-background p-10 text-foreground">
       <div className="flex items-center gap-3 mb-2">
-        <Trash2 className="h-8 w-8 text-cyan-400" />
-        <h1 className="text-4xl font-bold text-cyan-400">Trash</h1>
+        <Trash2 className="h-8 w-8 text-primary" />
+        <h1 className="text-4xl font-bold text-primary">Trash</h1>
       </div>
 
-      <p className="text-slate-400 mb-8">
+      <p className="text-muted-foreground mb-8">
         Files here will remain until you restore or permanently delete them.
       </p>
 
       {files.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24">
-          <Trash2 className="h-20 w-20 text-slate-600" />
+          <Trash2 className="h-20 w-20 text-muted-foreground/100" />
 
-          <h2 className="mt-6 text-2xl font-semibold text-white">
+          <h2 className="mt-6 text-2xl font-semibold text-foreground">
             Trash is empty
           </h2>
 
-          <p className="mt-2 text-slate-400 text-center max-w-md">
+          <p className="mt-2 text-muted-foreground text-center max-w-md">
             Deleted files will show up here so you can restore or permanently
             remove them.
           </p>
@@ -160,11 +160,11 @@ export default function TrashPage() {
                 />
 
                 <div className="min-w-0">
-                  <h3 className="font-semibold text-white truncate">
+                  <h3 className="font-semibold text-foreground truncate">
                     {file.original_name}
                   </h3>
 
-                  <p className="text-sm text-slate-400">
+                  <p className="text-sm text-muted-foreground">
                     {formatBytes(file.file_size)}
                   </p>
                 </div>

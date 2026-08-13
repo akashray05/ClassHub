@@ -12,16 +12,16 @@ export default function StatsCard({
   subtitle,
 }: StatsCardProps) {
   return (
-    <Card className="bg-slate-900 border-slate-700">
+    <Card className="bg-card border-border">
       <CardContent className="p-6">
-        <p className="text-gray-400 text-sm">{title}</p>
+        <p className="text-muted-foreground text-sm">{title}</p>
 
-        <h2 className="text-3xl font-bold text-cyan-400 mt-2">
+        <h2 className="text-3xl font-bold text-primary mt-2">
           {value}
         </h2>
 
         {subtitle && (
-          <p className="text-xs text-gray-500 mt-2">
+          <p className="text-xs text-muted-foreground mt-2">
             {subtitle}
           </p>
         )}

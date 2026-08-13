@@ -5,7 +5,7 @@ import Header from "./Header";
 
 export default function MainLayout() {
   return (
-    <div className="h-screen flex bg-slate-950">
+    <div className="h-screen flex bg-background">
 
       <Sidebar />
 

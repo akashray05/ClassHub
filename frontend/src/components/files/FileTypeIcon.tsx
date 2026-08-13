@@ -91,7 +91,7 @@ export function FileTypeIcon({
     default:
       return (
         <File
-          className={`text-slate-400 ${className ?? ""}`}
+          className={`text-muted-foreground ${className ?? ""}`}
         />
       );
   }

@@ -44,11 +44,11 @@ export function FileCard({
         />
 
         <div className="min-w-0">
-          <h3 className="font-semibold text-white truncate">
+          <h3 className="font-semibold text-foreground truncate">
             {file.original_name}
           </h3>
 
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-muted-foreground">
             {formatBytes(file.file_size)}
           </p>
         </div>

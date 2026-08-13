@@ -1,5 +1,3 @@
-export { UploadManager } from "./components/UploadManager";
-
 export { UploadDropzone } from "./components/UploadDropzone";
 
 export { UploadQueue } from "./components/UploadQueue";

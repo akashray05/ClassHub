@@ -32,11 +32,11 @@ export default function FolderCard({
         cursor-pointer
         rounded-xl
         border
-        border-slate-700
-        bg-slate-900
+        border-border
+        bg-card
         p-5
-        hover:border-cyan-400
-        hover:bg-slate-800
+        hover:border-primary/60
+        hover:bg-muted
         transition
         relative
       "
@@ -59,7 +59,7 @@ export default function FolderCard({
             </DropdownMenuTrigger>
 
             <DropdownMenuContent
-              className="bg-slate-900 border-slate-700 text-white"
+              className="bg-card border-border text-foreground"
               onClick={(e) => e.stopPropagation()}
             >
               {onRename && (
@@ -81,7 +81,7 @@ export default function FolderCard({
       </div>
 
       {description && (
-        <p className="mt-2 text-gray-400">
+        <p className="mt-2 text-muted-foreground">
           {description}
         </p>
       )}

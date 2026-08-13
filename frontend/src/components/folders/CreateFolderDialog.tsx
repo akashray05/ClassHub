@@ -55,13 +55,13 @@ export default function CreateFolderDialog({
   }
 
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900 p-6 mb-6">
+    <div className="rounded-xl border border-border bg-card p-6 mb-6">
 
       <h2 className="text-xl font-semibold mb-4">
         Create Folder
       </h2>
 
-      <Input
+      {/* <Input
         placeholder="Folder name"
         value={name}
         onChange={(e) => setName(e.target.value)}
@@ -80,7 +80,38 @@ export default function CreateFolderDialog({
         disabled={isSubmitting}
       >
         {isSubmitting ? "Creating..." : "+ Create Folder"}
-      </Button>
+      </Button> */}
+
+      <Input
+  placeholder="Folder name"
+  value={name}
+  maxLength={40}
+  onChange={(e) => setName(e.target.value)}
+/>
+
+{/* <p className="mt-1 text-right text-xs text-muted-foreground">
+  {name.length}/30
+</p> */}
+
+<Input
+  className="mt-3"
+  placeholder="Description (optional)"
+  value={description}
+  maxLength={60}
+  onChange={(e) => setDescription(e.target.value)}
+/>
+
+{/* <p className="mt-1 text-right text-xs text-muted-foreground">
+  {description.length}/50
+</p> */}
+
+<Button
+  className="mt-4"
+  onClick={handleCreate}
+  disabled={isSubmitting || !name.trim()}
+>
+  {isSubmitting ? "Creating..." : "+ Create Folder"}
+</Button>
 
     </div>
   );

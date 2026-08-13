@@ -16,7 +16,7 @@ export function UploadQueue({
 
     return (
         <div className="mt-6 space-y-4">
-            <h2 className="text-lg font-semibold text-white">
+            <h2 className="text-lg font-semibold text-foreground">
                 Upload Queue
             </h2>
 

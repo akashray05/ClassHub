@@ -73,3 +73,11 @@ class UpdateSharePermissionRequest(BaseModel):
     can_download: bool
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class DashboardSummaryResponse(BaseModel):
+    total_files: int
+    total_folders: int
+    trash_count: int
+    shared_files_count: int
+    recent_files: list[FileResponse]

@@ -50,23 +50,23 @@ export function UploadDropzone({
         rounded-2xl
         border-2
         border-dashed
-        border-cyan-500/40
-        bg-slate-900
+        border-primary/30
+        bg-card
         p-10
         text-center
         transition-all
-        hover:border-cyan-400
+        hover:border-primary/60
       "
     >
       <UploadCloud
-        className="mx-auto h-14 w-14 text-cyan-400"
+        className="mx-auto h-14 w-14 text-primary"
       />
 
       <h2 className="mt-5 text-xl font-semibold">
         Drag & Drop Files
       </h2>
 
-      <p className="mt-2 text-slate-400">
+      <p className="mt-2 text-muted-foreground">
         or click below to browse files
       </p>
 

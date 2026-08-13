@@ -150,10 +150,10 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 p-10 text-white">
+    <div className="min-h-screen bg-background p-10 text-foreground">
       <div className="flex items-center gap-3 mb-8">
-        <SettingsIcon className="h-8 w-8 text-cyan-400" />
-        <h1 className="text-4xl font-bold text-cyan-400">Settings</h1>
+        <SettingsIcon className="h-8 w-8 text-primary" />
+        <h1 className="text-4xl font-bold text-primary">Settings</h1>
       </div>
 
       <div className="max-w-2xl space-y-6">
@@ -179,7 +179,7 @@ export default function SettingsPage() {
                 />
 
                 {profileErrors.name && (
-                  <p className="text-sm text-red-500">
+                  <p className="text-sm text-destructive">
                     {profileErrors.name.message}
                   </p>
                 )}
@@ -212,14 +212,14 @@ export default function SettingsPage() {
           </CardHeader>
 
           <CardContent>
-            <div className="w-full h-3 rounded-full bg-slate-800 overflow-hidden">
+            <div className="w-full h-3 rounded-full bg-muted overflow-hidden">
               <div
-                className="bg-cyan-400 h-full transition-all duration-300"
+                className="bg-primary h-full transition-all duration-300"
                 style={{ width: `${usagePercent}%` }}
               />
             </div>
 
-            <p className="mt-2 text-sm text-slate-400">
+            <p className="mt-2 text-sm text-muted-foreground">
               {isStorageLoading || !storage
                 ? "Loading storage..."
                 : `${formatBytes(storage.used)} of ${formatBytes(
@@ -259,7 +259,7 @@ export default function SettingsPage() {
                     onClick={() =>
                       setShowCurrentPassword((prev) => !prev)
                     }
-                    className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400 hover:text-slate-200"
+                    className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-muted-foreground hover:text-foreground"
                     tabIndex={-1}
                     aria-label={
                       showCurrentPassword
@@ -276,7 +276,7 @@ export default function SettingsPage() {
                 </div>
 
                 {passwordErrors.currentPassword && (
-                  <p className="text-sm text-red-500">
+                  <p className="text-sm text-destructive">
                     {passwordErrors.currentPassword.message}
                   </p>
                 )}
@@ -296,7 +296,7 @@ export default function SettingsPage() {
                   <button
                     type="button"
                     onClick={() => setShowNewPassword((prev) => !prev)}
-                    className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400 hover:text-slate-200"
+                    className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-muted-foreground hover:text-foreground"
                     tabIndex={-1}
                     aria-label={
                       showNewPassword ? "Hide password" : "Show password"
@@ -311,7 +311,7 @@ export default function SettingsPage() {
                 </div>
 
                 {passwordErrors.newPassword && (
-                  <p className="text-sm text-red-500">
+                  <p className="text-sm text-destructive">
                     {passwordErrors.newPassword.message}
                   </p>
                 )}
@@ -327,7 +327,7 @@ export default function SettingsPage() {
                 />
 
                 {passwordErrors.confirmPassword && (
-                  <p className="text-sm text-red-500">
+                  <p className="text-sm text-destructive">
                     {passwordErrors.confirmPassword.message}
                   </p>
                 )}

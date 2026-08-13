@@ -9,12 +9,14 @@ from sqlalchemy.orm import Session
 from ..core.auth import get_current_user
 from ..database.session import get_db
 from ..models.user import User
-from ..schemas.file import (FileMove, FileRename, FileResponse,
-                            PaginatedFileResponse, SharedByMeResponse,
-                            SharedFileResponse, SharedUser, ShareFileRequest,
+from ..schemas.file import (DashboardSummaryResponse, FileMove, FileRename,
+                            FileResponse, PaginatedFileResponse,
+                            SharedByMeResponse, SharedFileResponse,
+                            SharedUser, ShareFileRequest,
                             UpdateSharePermissionRequest)
 from ..services.download_service import download_file_service
-from ..services.listing_service import (get_folder_files_service,
+from ..services.listing_service import (get_dashboard_summary_service,
+                                        get_folder_files_service,
                                         get_trash_files_service,
                                         search_files_service)
 from ..services.share_service import (download_shared_file_service,
@@ -68,6 +70,8 @@ def get_folder_files(
     folder_id: int,
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=100),
+    sort_by: str = Query("date", pattern="^(name|date|size)$"),
+    sort_order: str = Query("desc", pattern="^(asc|desc)$"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -77,6 +81,8 @@ def get_folder_files(
         folder_id=folder_id,
         page=page,
         limit=limit,
+        sort_by=sort_by,
+        sort_order=sort_order,
     )
 
 
@@ -88,6 +94,8 @@ def search_files(
     q: str,
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=100),
+    sort_by: str = Query("date", pattern="^(name|date|size)$"),
+    sort_order: str = Query("desc", pattern="^(asc|desc)$"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -97,6 +105,8 @@ def search_files(
         query=q,
         page=page,
         limit=limit,
+        sort_by=sort_by,
+        sort_order=sort_order,
     )
 
 
@@ -115,6 +125,20 @@ def get_trash_files(
         current_user=current_user,
         page=page,
         limit=limit,
+    )
+
+
+@router.get(
+    "/dashboard-summary",
+    response_model=DashboardSummaryResponse,
+)
+def get_dashboard_summary(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return get_dashboard_summary_service(
+        db=db,
+        current_user=current_user,
     )
 
 
