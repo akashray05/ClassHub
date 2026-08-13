@@ -15,6 +15,10 @@ interface FileGridProps {
   onShare?: (file: FileItem) => void;
 
   onMove?: (file: FileItem) => void;
+
+  selectedIds?: Set<number>;
+
+  onToggleSelect?: (file: FileItem) => void;
 }
 
 export function FileGrid({
@@ -25,6 +29,8 @@ export function FileGrid({
   onDelete,
   onShare,
   onMove,
+  selectedIds,
+  onToggleSelect,
 }: FileGridProps) {
   return (
     <div
@@ -46,6 +52,8 @@ export function FileGrid({
           onDelete={onDelete}
           onShare={onShare}
           onMove={onMove}
+          selected={selectedIds?.has(file.id)}
+          onToggleSelect={onToggleSelect}
         />
       ))}
     </div>

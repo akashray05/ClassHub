@@ -21,14 +21,14 @@ import type { MessageResponse } from "@/types/auth";
 import { cn } from "@/lib/utils";
 
 type Props = {
-  file: FileItem | null;
+  files: FileItem[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onMoved: (fileId: number) => void;
+  onMoved: (fileIds: number[]) => void;
 };
 
 export default function MoveFileDialog({
-  file,
+  files,
   open,
   onOpenChange,
   onMoved,
@@ -39,6 +39,8 @@ export default function MoveFileDialog({
     null
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const isBulk = files.length > 1;
 
   useEffect(() => {
     if (!open) {
@@ -63,56 +65,74 @@ export default function MoveFileDialog({
   }, [open]);
 
   async function handleMove() {
-    if (!file || selectedFolderId === null) {
+    if (files.length === 0 || selectedFolderId === null) {
       return;
     }
 
     setIsSubmitting(true);
 
-    try {
-      await moveFile(file.id, selectedFolderId);
+    const destination = folders.find((f) => f.id === selectedFolderId);
+    const succeeded: number[] = [];
+    let firstError: string | null = null;
 
-      const destination = folders.find((f) => f.id === selectedFolderId);
+    for (const file of files) {
+      try {
+        await moveFile(file.id, selectedFolderId);
+        succeeded.push(file.id);
+      } catch (err) {
+        const axiosErr = err as AxiosError<MessageResponse>;
 
+        firstError =
+          axiosErr.response?.data?.detail ??
+          axiosErr.response?.data?.message ??
+          "Could not move this file.";
+      }
+    }
+
+    setIsSubmitting(false);
+
+    if (succeeded.length > 0) {
       toast.add({
-        title: "File moved",
+        title: isBulk ? "Files moved" : "File moved",
         description: destination
-          ? `"${file.original_name}" was moved to "${destination.name}".`
-          : `"${file.original_name}" was moved.`,
+          ? isBulk
+            ? `${succeeded.length} file${succeeded.length > 1 ? "s" : ""} moved to "${destination.name}".`
+            : `"${files[0].original_name}" was moved to "${destination.name}".`
+          : "Files moved.",
         type: "success",
       });
 
-      onMoved(file.id);
-      onOpenChange(false);
-    } catch (err) {
-      const axiosErr = err as AxiosError<MessageResponse>;
+      onMoved(succeeded);
+    }
 
+    if (firstError) {
       toast.add({
-        title: "Move failed",
-        description:
-          axiosErr.response?.data?.detail ??
-          axiosErr.response?.data?.message ??
-          "Could not move this file.",
+        title: succeeded.length > 0 ? "Some files couldn't be moved" : "Move failed",
+        description: firstError,
         type: "error",
       });
-    } finally {
-      setIsSubmitting(false);
     }
+
+    onOpenChange(false);
   }
 
+  const excludedFolderId = !isBulk ? files[0]?.folder_id : undefined;
+
   const otherFolders = folders.filter(
-    (folder) => folder.id !== file?.folder_id
+    (folder) => folder.id !== excludedFolderId
   );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Move file</DialogTitle>
+          <DialogTitle>Move {isBulk ? `${files.length} files` : "file"}</DialogTitle>
           <DialogDescription>
-            {file
-              ? `Choose a destination folder for "${file.original_name}".`
-              : "Choose a destination folder."}
+            {files.length === 0
+              ? "Choose a destination folder."
+              : isBulk
+              ? `Choose a destination folder for ${files.length} selected files.`
+              : `Choose a destination folder for "${files[0].original_name}".`}
           </DialogDescription>
         </DialogHeader>
 
@@ -123,7 +143,7 @@ export default function MoveFileDialog({
             </p>
           ) : otherFolders.length === 0 ? (
             <p className="text-sm text-muted-foreground py-4 text-center">
-              No other folders to move this file into.
+              No other folders to move into.
             </p>
           ) : (
             otherFolders.map((folder) => (

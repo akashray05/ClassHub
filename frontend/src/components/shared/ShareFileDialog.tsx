@@ -20,14 +20,14 @@ import type { FileItem } from "@/types/file";
 import type { MessageResponse } from "@/types/auth";
 
 type Props = {
-  file: FileItem | null;
+  files: FileItem[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onShared: () => void;
 };
 
 export default function ShareFileDialog({
-  file,
+  files,
   open,
   onOpenChange,
   onShared,
@@ -36,6 +36,8 @@ export default function ShareFileDialog({
   const [canDownload, setCanDownload] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const isBulk = files.length > 1;
+
   function resetAndClose() {
     setEmail("");
     setCanDownload(true);
@@ -43,7 +45,7 @@ export default function ShareFileDialog({
   }
 
   async function handleShare() {
-    if (!file) {
+    if (files.length === 0) {
       return;
     }
 
@@ -63,16 +65,47 @@ export default function ShareFileDialog({
     try {
       const recipient = await lookupUserByEmail(trimmedEmail);
 
-      await shareFile(file.id, recipient.id, canDownload);
+      let successCount = 0;
+      let firstError: string | null = null;
 
-      toast.add({
-        title: "File shared",
-        description: `"${file.original_name}" was shared with ${recipient.name}.`,
-        type: "success",
-      });
+      for (const file of files) {
+        try {
+          await shareFile(file.id, recipient.id, canDownload);
+          successCount += 1;
+        } catch (err) {
+          const axiosErr = err as AxiosError<MessageResponse>;
 
-      onShared();
-      resetAndClose();
+          firstError =
+            axiosErr.response?.data?.detail ??
+            axiosErr.response?.data?.message ??
+            "Could not share this file.";
+        }
+      }
+
+      if (successCount > 0) {
+        toast.add({
+          title: isBulk ? "Files shared" : "File shared",
+          description: isBulk
+            ? `${successCount} file${successCount > 1 ? "s" : ""} shared with ${recipient.name}.`
+            : `"${files[0].original_name}" was shared with ${recipient.name}.`,
+          type: "success",
+        });
+
+        onShared();
+      }
+
+      if (firstError) {
+        toast.add({
+          title:
+            successCount > 0 ? "Some files couldn't be shared" : "Share failed",
+          description: firstError,
+          type: "error",
+        });
+      }
+
+      if (successCount > 0) {
+        resetAndClose();
+      }
     } catch (err) {
       const axiosErr = err as AxiosError<MessageResponse>;
 
@@ -81,7 +114,7 @@ export default function ShareFileDialog({
         description:
           axiosErr.response?.data?.detail ??
           axiosErr.response?.data?.message ??
-          "Could not share this file.",
+          "Could not find a user with that email.",
         type: "error",
       });
     } finally {
@@ -93,11 +126,13 @@ export default function ShareFileDialog({
     <Dialog open={open} onOpenChange={(next) => (next ? onOpenChange(next) : resetAndClose())}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Share file</DialogTitle>
+          <DialogTitle>Share {isBulk ? `${files.length} files` : "file"}</DialogTitle>
           <DialogDescription>
-            {file
-              ? `Share "${file.original_name}" with another ClassHub user.`
-              : "Share this file with another ClassHub user."}
+            {files.length === 0
+              ? "Share this file with another ClassHub user."
+              : isBulk
+              ? `Share ${files.length} selected files with another ClassHub user.`
+              : `Share "${files[0].original_name}" with another ClassHub user.`}
           </DialogDescription>
         </DialogHeader>
 
@@ -131,7 +166,7 @@ export default function ShareFileDialog({
               onChange={(e) => setCanDownload(e.target.checked)}
               className="h-4 w-4 rounded border-border bg-muted accent-primary"
             />
-            Allow this user to download the file
+            Allow this user to download the file{isBulk ? "s" : ""}
           </label>
         </div>
 
@@ -145,7 +180,7 @@ export default function ShareFileDialog({
           </Button>
 
           <Button onClick={handleShare} disabled={isSubmitting}>
-            {isSubmitting ? "Sharing..." : "Share file"}
+            {isSubmitting ? "Sharing..." : isBulk ? `Share ${files.length} files` : "Share file"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -17,6 +17,7 @@ import {
   RenameFileDialog,
   DeleteFileDialog,
   MoveFileDialog,
+  BulkActionBar,
 } from "@/components/files";
 import ShareFileDialog from "@/components/shared/ShareFileDialog";
 
@@ -42,6 +43,8 @@ export default function FileExplorerPage() {
   const [sortBy, setSortBy] = useState<SortBy>("date");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
 
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+
   const secondaryFileInputRef = useRef<HTMLInputElement>(null);
 
   function openSecondaryFilePicker() {
@@ -61,13 +64,13 @@ export default function FileExplorerPage() {
   const [fileToRename, setFileToRename] = useState<FileItem | null>(null);
   const [isRenameOpen, setIsRenameOpen] = useState(false);
 
-  const [fileToDelete, setFileToDelete] = useState<FileItem | null>(null);
+  const [filesToDelete, setFilesToDelete] = useState<FileItem[]>([]);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
-  const [fileToShare, setFileToShare] = useState<FileItem | null>(null);
+  const [filesToShare, setFilesToShare] = useState<FileItem[]>([]);
   const [isShareOpen, setIsShareOpen] = useState(false);
 
-  const [fileToMove, setFileToMove] = useState<FileItem | null>(null);
+  const [filesToMove, setFilesToMove] = useState<FileItem[]>([]);
   const [isMoveOpen, setIsMoveOpen] = useState(false);
 
   const {
@@ -107,9 +110,10 @@ export default function FileExplorerPage() {
     onSuccess: () => loadFiles(page),
   });
 
-  // Reset to page 1 whenever the folder changes.
+  // Reset to page 1 and clear selection whenever the folder changes.
   useEffect(() => {
     setPage(1);
+    setSelectedIds(new Set());
   }, [folderId]);
 
   // Load the current folder page whenever the folder, page, or sort
@@ -200,17 +204,17 @@ export default function FileExplorerPage() {
   }
 
   function openDeleteDialog(file: FileItem) {
-    setFileToDelete(file);
+    setFilesToDelete([file]);
     setIsDeleteOpen(true);
   }
 
   function openShareDialog(file: FileItem) {
-    setFileToShare(file);
+    setFilesToShare([file]);
     setIsShareOpen(true);
   }
 
   function openMoveDialog(file: FileItem) {
-    setFileToMove(file);
+    setFilesToMove([file]);
     setIsMoveOpen(true);
   }
 
@@ -222,8 +226,18 @@ export default function FileExplorerPage() {
     );
   }
 
-  function handleFileDeleted(fileId: number) {
-    const remaining = files.filter((file) => file.id !== fileId);
+  function clearSelectedIds(ids: number[]) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      ids.forEach((id) => next.delete(id));
+      return next;
+    });
+  }
+
+  function handleFilesDeleted(fileIds: number[]) {
+    clearSelectedIds(fileIds);
+
+    const remaining = files.filter((file) => !fileIds.includes(file.id));
 
     if (remaining.length === 0 && page > 1) {
       goToPage(page - 1);
@@ -232,14 +246,73 @@ export default function FileExplorerPage() {
     }
   }
 
-  function handleFileMoved(fileId: number) {
-    const remaining = files.filter((file) => file.id !== fileId);
+  function handleFilesMoved(fileIds: number[]) {
+    clearSelectedIds(fileIds);
+
+    const remaining = files.filter((file) => !fileIds.includes(file.id));
 
     if (remaining.length === 0 && page > 1) {
       goToPage(page - 1);
     } else {
       loadFiles(page);
     }
+  }
+
+  // Selection
+
+  function toggleSelect(file: FileItem) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+
+      if (next.has(file.id)) {
+        next.delete(file.id);
+      } else {
+        next.add(file.id);
+      }
+
+      return next;
+    });
+  }
+
+  function clearSelection() {
+    setSelectedIds(new Set());
+  }
+
+  const selectedFiles = files.filter((file) => selectedIds.has(file.id));
+
+  async function handleBulkDownload() {
+    if (selectedFiles.length === 0) return;
+
+    for (const file of selectedFiles) {
+      try {
+        await downloadFile(file.id, file.original_name);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    toast.add({
+      title: "Download started",
+      description: `Downloading ${selectedFiles.length} file${
+        selectedFiles.length > 1 ? "s" : ""
+      }.`,
+      type: "success",
+    });
+  }
+
+  function openBulkDeleteDialog() {
+    setFilesToDelete(selectedFiles);
+    setIsDeleteOpen(true);
+  }
+
+  function openBulkMoveDialog() {
+    setFilesToMove(selectedFiles);
+    setIsMoveOpen(true);
+  }
+
+  function openBulkShareDialog() {
+    setFilesToShare(selectedFiles);
+    setIsShareOpen(true);
   }
 
   if (loading) {
@@ -286,6 +359,15 @@ export default function FileExplorerPage() {
           onChange={handleSecondaryFileChange}
         />
 
+        <BulkActionBar
+          count={selectedFiles.length}
+          onDownload={handleBulkDownload}
+          onMove={openBulkMoveDialog}
+          onShare={openBulkShareDialog}
+          onDelete={openBulkDeleteDialog}
+          onClear={clearSelection}
+        />
+
         <div className="mt-8">
           {files.length === 0 ? (
             <EmptyFiles
@@ -310,6 +392,8 @@ export default function FileExplorerPage() {
               onDelete={openDeleteDialog}
               onShare={openShareDialog}
               onMove={openMoveDialog}
+              selectedIds={selectedIds}
+              onToggleSelect={toggleSelect}
             />
           )}
         </div>
@@ -358,24 +442,24 @@ export default function FileExplorerPage() {
       />
 
       <DeleteFileDialog
-        file={fileToDelete}
+        files={filesToDelete}
         open={isDeleteOpen}
         onOpenChange={setIsDeleteOpen}
-        onDeleted={handleFileDeleted}
+        onDeleted={handleFilesDeleted}
       />
 
       <ShareFileDialog
-        file={fileToShare}
+        files={filesToShare}
         open={isShareOpen}
         onOpenChange={setIsShareOpen}
         onShared={() => {}}
       />
 
       <MoveFileDialog
-        file={fileToMove}
+        files={filesToMove}
         open={isMoveOpen}
         onOpenChange={setIsMoveOpen}
-        onMoved={handleFileMoved}
+        onMoved={handleFilesMoved}
       />
     </>
   );
