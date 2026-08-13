@@ -7,6 +7,7 @@ import type { FileItem } from "@/types/file";
 import { toast } from "@/components/ui/toast";
 
 import { FileGrid } from "@/components/files";
+import { FileGridSkeleton } from "@/components/files/FileCardSkeleton";
 import {
   PreviewDialog,
   usePreview,
@@ -72,10 +73,10 @@ export default function SearchResultsPage() {
         </p>
 
         {loading ? (
-          <p className="text-muted-foreground">Searching...</p>
+          <FileGridSkeleton />
         ) : files.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24">
-            <SearchIcon className="h-20 w-20 text-muted-foreground/100" />
+            <SearchIcon className="h-20 w-20 text-muted-foreground/60" />
 
             <h2 className="mt-6 text-2xl font-semibold text-foreground">
               No files found

@@ -26,6 +26,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { formatBytes } from "@/utils";
 
 import StatsCard from "@/components/dashboard/StatsCard";
+import { StatsCardSkeleton } from "@/components/common/StatsCardSkeleton";
+import { ListSkeleton } from "@/components/common/ListRowSkeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
@@ -206,59 +208,67 @@ export default function AdminPage() {
       </p>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 mb-10">
-        <StatsCard
-          title="Total users"
-          value={stats ? stats.total_users : "—"}
-          icon={<Users />}
-        />
+        {!stats ? (
+          Array.from({ length: 8 }).map((_, i) => (
+            <StatsCardSkeleton key={i} />
+          ))
+        ) : (
+          <>
+            <StatsCard
+              title="Total users"
+              value={stats.total_users}
+              icon={<Users />}
+            />
 
-        <StatsCard
-          title="Active users"
-          value={stats ? stats.active_users : "—"}
-          icon={<CheckCircle2 />}
-        />
+            <StatsCard
+              title="Active users"
+              value={stats.active_users}
+              icon={<CheckCircle2 />}
+            />
 
-        <StatsCard
-          title="Total files"
-          value={stats ? stats.total_files : "—"}
-          icon={<Files />}
-        />
+            <StatsCard
+              title="Total files"
+              value={stats.total_files}
+              icon={<Files />}
+            />
 
-        <StatsCard
-          title="Storage used"
-          value={stats ? formatBytes(stats.total_storage_used) : "—"}
-          icon={<HardDrive />}
-        />
+            <StatsCard
+              title="Storage used"
+              value={formatBytes(stats.total_storage_used)}
+              icon={<HardDrive />}
+            />
 
-        <StatsCard
-          title="Total folders"
-          value={stats ? stats.total_folders : "—"}
-          icon={<Files />}
-        />
+            <StatsCard
+              title="Total folders"
+              value={stats.total_folders}
+              icon={<Files />}
+            />
 
-        <StatsCard
-          title="Admins"
-          value={stats ? stats.admin_users : "—"}
-          icon={<Crown />}
-        />
+            <StatsCard
+              title="Admins"
+              value={stats.admin_users}
+              icon={<Crown />}
+            />
 
-        <StatsCard
-          title="Verified users"
-          value={stats ? stats.verified_users : "—"}
-          icon={<ShieldCheck />}
-        />
+            <StatsCard
+              title="Verified users"
+              value={stats.verified_users}
+              icon={<ShieldCheck />}
+            />
 
-        <StatsCard
-          title="Active shares"
-          value={stats ? stats.total_shares : "—"}
-          icon={<Share2 />}
-        />
+            <StatsCard
+              title="Active shares"
+              value={stats.total_shares}
+              icon={<Share2 />}
+            />
+          </>
+        )}
       </div>
 
       <h2 className="text-2xl font-semibold mb-4">All users</h2>
 
       {loading ? (
-        <p className="text-muted-foreground">Loading users...</p>
+        <ListSkeleton />
       ) : (
         <div className="rounded-xl border border-border overflow-hidden">
           <table className="w-full text-left">

@@ -26,6 +26,8 @@ import type { SortBy, SortOrder } from "@/services/file";
 import type { FileItem } from "@/types/file";
 import { toast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { FileGridSkeleton } from "@/components/files/FileCardSkeleton";
 
 export default function FileExplorerPage() {
   const { folderId } = useParams();
@@ -317,8 +319,16 @@ export default function FileExplorerPage() {
 
   if (loading) {
     return (
-      <div className="p-10 text-foreground">
-        Loading...
+      <div className="min-h-screen bg-background p-10 text-foreground">
+        <Skeleton className="mb-8 h-9 w-48" />
+        <Skeleton className="h-40 w-full rounded-xl" />
+        <div className="mt-6 flex items-center justify-between gap-3">
+          <Skeleton className="h-10 w-full max-w-sm" />
+          <Skeleton className="h-10 w-24 shrink-0" />
+        </div>
+        <div className="mt-8">
+          <FileGridSkeleton />
+        </div>
       </div>
     );
   }

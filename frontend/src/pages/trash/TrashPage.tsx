@@ -12,6 +12,7 @@ import type { MessageResponse } from "@/types/auth";
 
 import { AppCard, AppButton } from "@/components/app";
 import { FileTypeIcon } from "@/components/files";
+import { ListSkeleton } from "@/components/common/ListRowSkeleton";
 import { formatBytes } from "@/utils";
 import { toast } from "@/components/ui/toast";
 import {
@@ -114,14 +115,6 @@ export default function TrashPage() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="p-10 text-foreground">
-        Loading...
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-background p-10 text-foreground">
       <div className="flex items-center gap-3 mb-2">
@@ -133,7 +126,9 @@ export default function TrashPage() {
         Files here will remain until you restore or permanently delete them.
       </p>
 
-      {files.length === 0 ? (
+      {loading ? (
+        <ListSkeleton />
+      ) : files.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24">
           <Trash2 className="h-20 w-20 text-muted-foreground/100" />
 

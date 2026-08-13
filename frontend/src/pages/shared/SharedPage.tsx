@@ -16,6 +16,7 @@ import type { MessageResponse } from "@/types/auth";
 import { AppCard, AppButton } from "@/components/app";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/toast";
+import { ListSkeleton } from "@/components/common/ListRowSkeleton";
 import { formatBytes } from "@/utils";
 
 type TabKey = "with-me" | "by-me";
@@ -161,14 +162,6 @@ export default function SharedPage() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="p-10 text-foreground">
-        Loading...
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-background p-10 text-foreground">
       <div className="flex items-center gap-3 mb-2">
@@ -204,8 +197,12 @@ export default function SharedPage() {
         </button>
       </div>
 
-      {tab === "with-me" && (
-        sharedWithMe.length === 0 ? (
+      {loading ? (
+        <ListSkeleton />
+      ) : (
+        <>
+          {tab === "with-me" && (
+            sharedWithMe.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24">
             <Users className="h-20 w-20 text-muted-foreground/60" />
 
@@ -266,7 +263,7 @@ export default function SharedPage() {
       {tab === "by-me" && (
         sharedByMe.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24">
-            <Users className="h-20 w-20 text-muted-foreground/100" />
+            <Users className="h-20 w-20 text-muted-foreground/60" />
 
             <h2 className="mt-6 text-2xl font-semibold text-foreground">
               You haven't shared anything yet
@@ -354,6 +351,8 @@ export default function SharedPage() {
             ))}
           </div>
         )
+      )}
+        </>
       )}
     </div>
   );

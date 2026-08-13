@@ -7,9 +7,11 @@ import DeleteFolderDialog from "../../components/folders/DeleteFolderDialog";
 import { getFolders } from "../../services/folder";
 import type { Folder } from "../../types/folder";
 import FolderCard from "../../components/folders/FoldersCard";
+import { FolderGridSkeleton } from "../../components/folders/FolderCardSkeleton";
 
 export default function FoldersPage() {
   const [folders, setFolders] = useState<Folder[]>([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   const [folderToRename, setFolderToRename] = useState<Folder | null>(null);
@@ -24,6 +26,8 @@ export default function FoldersPage() {
       setFolders(data);
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -61,7 +65,9 @@ export default function FoldersPage() {
         My Folders
       </h2>
 
-      {folders.length === 0 ? (
+      {loading ? (
+        <FolderGridSkeleton />
+      ) : folders.length === 0 ? (
         <p>No folders found.</p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

@@ -9,7 +9,9 @@ import { formatBytes, formatDate } from "@/utils";
 
 import FoldersPage from "./FoldersPage";
 import StatsCard from "../../components/common/StatsCard";
+import { StatsCardSkeleton } from "@/components/common/StatsCardSkeleton";
 import { FileTypeIcon } from "@/components/files";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function DashboardPage() {
   const navigate = useNavigate();
@@ -41,34 +43,44 @@ export default function DashboardPage() {
 
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
 
-          <StatsCard
-            title="My Files"
-            value={isSummaryLoading ? "…" : String(summary?.total_files ?? 0)}
-            subtitle="Files uploaded"
-          />
+          {isSummaryLoading || isStorageLoading ? (
+            <>
+              <StatsCardSkeleton />
+              <StatsCardSkeleton />
+              <StatsCardSkeleton />
+              <StatsCardSkeleton />
+            </>
+          ) : (
+            <>
+              <StatsCard
+                title="My Files"
+                value={String(summary?.total_files ?? 0)}
+                subtitle="Files uploaded"
+              />
 
-          <StatsCard
-            title="Storage Used"
-            value={isStorageLoading || !storage ? "…" : formatBytes(storage.used)}
-            subtitle={
-              storage ? `Available ${formatBytes(storage.available)}` : undefined
-            }
-          />
+              <StatsCard
+                title="Storage Used"
+                value={storage ? formatBytes(storage.used) : "0 Bytes"}
+                subtitle={
+                  storage
+                    ? `Available ${formatBytes(storage.available)}`
+                    : undefined
+                }
+              />
 
-          <StatsCard
-            title="Shared Files"
-            value={
-              isSummaryLoading ? "…" : String(summary?.shared_files_count ?? 0)
-            }
-            subtitle="Shared by you"
-          />
+              <StatsCard
+                title="Shared Files"
+                value={String(summary?.shared_files_count ?? 0)}
+                subtitle="Shared by you"
+              />
 
-          <StatsCard
-            title="Trash"
-            value={isSummaryLoading ? "…" : String(summary?.trash_count ?? 0)}
-            subtitle="Deleted files"
-            
-          />
+              <StatsCard
+                title="Trash"
+                value={String(summary?.trash_count ?? 0)}
+                subtitle="Deleted files"
+              />
+            </>
+          )}
 
         </div>
 
@@ -85,7 +97,18 @@ export default function DashboardPage() {
           </div>
 
           {isSummaryLoading ? (
-            <p className="mt-4 text-muted-foreground">Loading...</p>
+            <div className="mt-4 space-y-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-3 py-1">
+                  <Skeleton className="h-8 w-8 shrink-0 rounded-lg" />
+                  <div className="min-w-0 flex-1 space-y-1.5">
+                    <Skeleton className="h-3.5 w-1/2" />
+                    <Skeleton className="h-3 w-1/4" />
+                  </div>
+                  <Skeleton className="h-3 w-12 shrink-0" />
+                </div>
+              ))}
+            </div>
           ) : !summary || summary.recent_files.length === 0 ? (
             <p className="mt-4 text-muted-foreground">
               No recent uploads yet.
