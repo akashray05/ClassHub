@@ -456,6 +456,7 @@ export default function FileExplorerPage() {
         open={isDeleteOpen}
         onOpenChange={setIsDeleteOpen}
         onDeleted={handleFilesDeleted}
+        onUndo={() => loadFiles(page)}
       />
 
       <ShareFileDialog
@@ -470,6 +471,7 @@ export default function FileExplorerPage() {
         open={isMoveOpen}
         onOpenChange={setIsMoveOpen}
         onMoved={handleFilesMoved}
+        onUndo={() => loadFiles(page)}
       />
     </>
   );

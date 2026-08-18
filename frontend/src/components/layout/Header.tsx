@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Bell, LogOut, User, Settings } from "lucide-react";
+import { Search, LogOut, User, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -14,6 +14,7 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 
 import { useAuth } from "@/hooks/useAuth";
+import { NotificationBell } from "./NotificationBell";
 
 export default function Header() {
   const navigate = useNavigate();
@@ -47,7 +48,7 @@ export default function Header() {
 
         <Search
           size={18}
-          className="absolute left-3 top-2 text-muted-foreground"
+          className="absolute left-3 top-3 text-muted-foreground"
         />
 
         <Input
@@ -61,10 +62,7 @@ export default function Header() {
 
       <div className="flex items-center gap-5">
 
-        <Bell
-          size={20}
-          className="text-muted-foreground"
-        />
+        <NotificationBell />
 
         <DropdownMenu>
 

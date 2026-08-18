@@ -7,6 +7,7 @@ from ..models.user import User
 from ..storage import get_storage
 from ..utils.file_utils import get_file_by_id, get_owned_file
 from ..utils.permissions import verify_download_permission
+from .notification_data_service import create_notification
 
 storage = get_storage()
 
@@ -77,6 +78,15 @@ def share_file_service(
     db.add(share)
     db.commit()
     db.refresh(share)
+
+    create_notification(
+        db=db,
+        user_id=recipient.id,
+        actor_id=owner.id,
+        file_id=file.id,
+        type="file_shared",
+        message=f'{owner.name} shared "{file.original_name}" with you.',
+    )
 
     return {"message": "File shared successfully"}
 

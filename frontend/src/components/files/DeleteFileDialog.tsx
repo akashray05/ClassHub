@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 
-import { deleteFile } from "@/services/file";
+import { deleteFile, restoreFile } from "@/services/file";
 import type { FileItem } from "@/types/file";
 import type { MessageResponse } from "@/types/auth";
 
@@ -21,6 +21,7 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onDeleted: (fileIds: number[]) => void;
+  onUndo?: () => void;
 };
 
 export default function DeleteFileDialog({
@@ -28,10 +29,41 @@ export default function DeleteFileDialog({
   open,
   onOpenChange,
   onDeleted,
+  onUndo,
 }: Props) {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const isBulk = files.length > 1;
+
+  async function handleUndo(fileIds: number[]) {
+    try {
+      for (const id of fileIds) {
+        await restoreFile(id);
+      }
+
+      toast.add({
+        title: "Restored",
+        description:
+          fileIds.length > 1
+            ? `${fileIds.length} files restored from trash.`
+            : "File restored from trash.",
+        type: "success",
+      });
+
+      onUndo?.();
+    } catch (err) {
+      const axiosErr = err as AxiosError<MessageResponse>;
+
+      toast.add({
+        title: "Undo failed",
+        description:
+          axiosErr.response?.data?.detail ??
+          axiosErr.response?.data?.message ??
+          "Could not restore these files. Check the Trash page.",
+        type: "error",
+      });
+    }
+  }
 
   async function handleDelete() {
     if (files.length === 0) {
@@ -66,6 +98,10 @@ export default function DeleteFileDialog({
           ? `${succeeded.length} file${succeeded.length > 1 ? "s" : ""} moved to trash.`
           : `"${files[0].original_name}" was moved to trash.`,
         type: "success",
+        actionProps: {
+          children: "Undo",
+          onClick: () => handleUndo(succeeded),
+        },
       });
 
       onDeleted(succeeded);

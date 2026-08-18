@@ -25,6 +25,7 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onMoved: (fileIds: number[]) => void;
+  onUndo?: () => void;
 };
 
 export default function MoveFileDialog({
@@ -32,6 +33,7 @@ export default function MoveFileDialog({
   open,
   onOpenChange,
   onMoved,
+  onUndo,
 }: Props) {
   const [folders, setFolders] = useState<Folder[]>([]);
   const [isLoadingFolders, setIsLoadingFolders] = useState(false);
@@ -64,6 +66,38 @@ export default function MoveFileDialog({
       .finally(() => setIsLoadingFolders(false));
   }, [open]);
 
+  async function handleUndo(
+    originalLocations: { fileId: number; folderId: number }[]
+  ) {
+    try {
+      for (const { fileId, folderId } of originalLocations) {
+        await moveFile(fileId, folderId);
+      }
+
+      toast.add({
+        title: "Move undone",
+        description:
+          originalLocations.length > 1
+            ? `${originalLocations.length} files moved back.`
+            : "File moved back.",
+        type: "success",
+      });
+
+      onUndo?.();
+    } catch (err) {
+      const axiosErr = err as AxiosError<MessageResponse>;
+
+      toast.add({
+        title: "Undo failed",
+        description:
+          axiosErr.response?.data?.detail ??
+          axiosErr.response?.data?.message ??
+          "Could not move these files back.",
+        type: "error",
+      });
+    }
+  }
+
   async function handleMove() {
     if (files.length === 0 || selectedFolderId === null) {
       return;
@@ -73,12 +107,14 @@ export default function MoveFileDialog({
 
     const destination = folders.find((f) => f.id === selectedFolderId);
     const succeeded: number[] = [];
+    const originalLocations: { fileId: number; folderId: number }[] = [];
     let firstError: string | null = null;
 
     for (const file of files) {
       try {
         await moveFile(file.id, selectedFolderId);
         succeeded.push(file.id);
+        originalLocations.push({ fileId: file.id, folderId: file.folder_id });
       } catch (err) {
         const axiosErr = err as AxiosError<MessageResponse>;
 
@@ -100,6 +136,10 @@ export default function MoveFileDialog({
             : `"${files[0].original_name}" was moved to "${destination.name}".`
           : "Files moved.",
         type: "success",
+        actionProps: {
+          children: "Undo",
+          onClick: () => handleUndo(originalLocations),
+        },
       });
 
       onMoved(succeeded);

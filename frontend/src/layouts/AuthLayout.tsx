@@ -28,7 +28,7 @@ export default function AuthLayout() {
         </div>
 
         <p className="text-[14px] text-teal-100/60">
-          Built for IIT Bombay students.
+          Under Development. &copy; 2026 *ClassHub*(temp...). All rights reserved.
         </p>
 
         <div

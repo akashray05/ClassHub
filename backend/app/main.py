@@ -8,7 +8,7 @@ from .database.session import engine
 from .exceptions.handlers import register_exception_handlers
 # import backend.app.models
 from .models import file, folder, user
-from .routers import files, folders, users
+from .routers import files, folders, notifications, users
 
 Base.metadata.create_all(bind=engine)
 
@@ -35,6 +35,7 @@ app.include_router(folders.router)
 app.include_router(files.router)
 app.include_router(auth.router)
 app.include_router(admin.router)
+app.include_router(notifications.router)
 
 
 @app.get("/")
